@@ -1,25 +1,40 @@
-# Large generated route memory
-*.npz
-*.npy
-
-# Metadata/runtime outputs
-*.json
-
-# Extracted route frames
-vxn_branch_frames_dtw/
-vxn_extracted_frames/
-extracted_frames/
+# Python cache
+__pycache__/
+*.pyc
 
 # Jupyter checkpoints
 .ipynb_checkpoints/
 
-# TensorFlow logs
-logs/
-events.out.tfevents.*
-
-# Demo/output videos
-*.mp4
+# Virtual environments
+venv/
+.env
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# Raw/private videos
+videos/
+raw_videos/
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Generated extracted frame folders
+vxn_branch_frames_dtw/
+vxn_extracted_frames/
+extracted_frames/
+
+# Generated local memory/output files
+*.npy
+*.npz
+*.json
+
+# Keep curated sample result files
+!sample_results/**/*.json
+!sample_results/**/*.npz
+
+# TensorFlow logs
+logs/
+events.out.tfevents.*
