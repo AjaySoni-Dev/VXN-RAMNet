@@ -1,0 +1,148 @@
+VXN-RAMNet Sample Console Output
+================================
+
+Experiment
+----------
+DTW-Synchronized Shared-Prefix Branch Graph Learning and Query Classification
+
+Notebook Source
+---------------
+VXN-RAM_NET_3(2).ipynb
+
+Prototype Status
+----------------
+This output is from a notebook-based research prototype.
+It is not a certified navigation, medical, or safety system.
+
+Input Videos
+------------
+LEFT route video:
+left_route.mp4
+
+RIGHT route video:
+right_route.mp4
+
+QUERY route video:
+query_route.mp4
+
+Frame Extraction
+----------------
+- left_route: 120 frames extracted from the first 20.00 seconds
+- right_route: 120 frames extracted from the first 20.00 seconds
+- query_route: 120 frames extracted from the first 20.00 seconds
+
+Encoder
+-------
+Model: EfficientNetB0
+Mode: Frozen visual encoder
+Retraining used: No
+
+Graph Learning Stage
+--------------------
+Architecture:
+DTW-Synchronized Shared-Prefix Branch Graph Learning
+
+Purpose:
+- Detect the shared/common path between LEFT and RIGHT route videos
+- Synchronize videos when transition timing is different
+- Detect divergence / junction region
+- Store the first route after divergence as LEFT branch
+- Store the second route after divergence as RIGHT branch
+
+DTW Divergence Result
+---------------------
+Detection method: dtw_stable_smoothed_drop
+Alignment transition k: 66
+Alignment divergence k: 67
+
+LEFT transition index: 59
+RIGHT transition index: 63
+
+LEFT divergence start: 60
+RIGHT divergence start: 64
+
+Graph Split Summary
+-------------------
+COMMON_PATH pairs: 67
+LEFT_BRANCH frames: 60
+RIGHT_BRANCH frames: 56
+
+Learned Graph
+-------------
+Root: College
+Common path: College_to_Junction
+Junction: Junction_A
+LEFT branch: Home
+RIGHT branch: Tuition
+
+Saved Graph Files
+-----------------
+Graph memory:
+C:\Users\progr\JupyterNotebook\VXN-RAM\vxn_branch_graph_memory_dtw.npz
+
+Graph metadata:
+C:\Users\progr\JupyterNotebook\VXN-RAM\vxn_branch_graph_metadata_dtw.json
+
+Query Classification Stage
+--------------------------
+Purpose:
+Classify the query route video as LEFT branch, RIGHT branch, uncertain branch, or unknown branch.
+
+Final Prediction
+----------------
+Prediction: LEFT_BRANCH_HOME
+Reason: Strong LEFT branch evidence. Common path weakness ignored because branch is clearly LEFT.
+
+Query Synchronization
+---------------------
+Query common end index: 48
+Query branch start index: 49
+
+Scores
+------
+Common score: 0.6482
+LEFT branch score: 0.8376
+RIGHT branch score: 0.711
+Branch gap: 0.1266
+
+Saved Query Report
+------------------
+C:\Users\progr\JupyterNotebook\VXN-RAM\vxn_branch_query_classification_report_dtw.json
+
+Interpretation
+--------------
+The query route was classified using branch evidence after detecting the query common-path end.
+If the branch score is strong and the LEFT/RIGHT gap is clear, the system allows branch evidence
+to dominate even when the common-path score is not very high.
+
+Generated Output Types
+----------------------
+- Extracted route frames
+- DTW similarity alignment outputs
+- Graph memory NPZ file
+- Graph metadata JSON file
+- Query classification JSON report
+- Transition context visualization in notebook output
+
+Notes
+-----
+- The notebook uses video-based experimentation, not live Android deployment.
+- Generated frame folders are local experiment outputs and are not recommended for public upload.
+- The graph memory and reports can be included as small sample results if they do not expose private data.
+
+Selected Raw Console Lines
+--------------------------
+✅ Frame extraction complete.
+✅ DTW synchronization complete.
+DTW DIVERGENCE RESULT
+Graph split summary:
+✅ DTW graph memory saved.
+QUERY ROUTE SCORE REPORT
+FINAL DTW BRANCH CLASSIFICATION
+Prediction: LEFT_BRANCH_HOME
+Reason: Strong LEFT branch evidence. Common path weakness ignored because branch is clearly LEFT.
+Common score: 0.6482
+LEFT score: 0.8376
+RIGHT score: 0.711
+Branch gap: 0.1266
+✅ Query classification report saved.
