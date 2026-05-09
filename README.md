@@ -1,242 +1,80 @@
-<div align="center">
-
 # VXN-RAMNet
 
-### VisionX Routine Adaptive Memory Network
+**VisionX Routine Adaptive Memory Network**
 
-**GPS-Free Visual Route Memory and Branch Graph Navigation Intelligence System**
+A research prototype for GPS-free visual route memory, shared-path branch graph learning, and assistive navigation intelligence.
 
-<br/>
-
-![Status](https://img.shields.io/badge/Status-Research%20Prototype-blue?style=for-the-badge)
-![Domain](https://img.shields.io/badge/Domain-Assistive%20AI-success?style=for-the-badge)
-![Focus](https://img.shields.io/badge/Focus-Visual%20Navigation-important?style=for-the-badge)
-![Architecture](https://img.shields.io/badge/Architecture-Graph%20Memory-orange?style=for-the-badge)
-![Runtime](https://img.shields.io/badge/Runtime-2--3%20FPS-critical?style=for-the-badge)
-
-<br/>
-
-**A research-oriented route memory and graph navigation architecture for personalized assistive intelligence.**
-
-</div>
+![Status](https://img.shields.io/badge/status-research%20prototype-blue)
+![Python](https://img.shields.io/badge/python-3.10%2B-green)
+![Notebook](https://img.shields.io/badge/workflow-jupyter%20notebook-orange)
+![Domain](https://img.shields.io/badge/domain-assistive%20AI-purple)
 
 ---
 
 ## Overview
 
-**VXN-RAMNet** is a GPS-free visual navigation intelligence architecture designed to help assistive systems understand repeated routes, shared paths, route branches, and navigation uncertainty.
+VXN-RAMNet is an experimental visual navigation system that explores how repeated routes can be learned using camera/video input instead of GPS.
 
-Unlike conventional assistive vision systems that mainly detect objects, VXN-RAMNet focuses on route understanding through:
+The project focuses on:
 
-- Visual embeddings
-- Route memory
-- Dynamic Time Warping synchronization
-- Shared-prefix graph learning
-- LEFT/RIGHT branch reasoning
-- Unknown-route learning
-- Risk-aware guidance
+- extracting frames from route videos
+- generating visual embeddings using a frozen encoder
+- comparing routes using cosine similarity
+- detecting shared route sections
+- identifying where two routes diverge
+- creating a simple LEFT/RIGHT branch memory
+- classifying a query route video as LEFT or RIGHT
+- handling uncertain and unknown route cases
 
-The system is designed as a research prototype for assistive AI, visual navigation, graph-based route memory, and edge AI deployment.
-
----
-
-## Problem Statement
-
-Most assistive AI pipelines follow this structure:
-
-```text
-Camera Frame
-    ↓
-Object Detector
-    ↓
-Object Name
-    ↓
-Voice Output
-```
-
-This is useful for perception, but it does not answer important navigation questions:
-
-- Where is the user currently?
-- Is the user on the correct route?
-- Where does the route split?
-- Which branch leads to the selected destination?
-- Has the user taken a wrong turn?
-- Is the route known, uncertain, or unknown?
-
-VXN-RAMNet extends assistive perception into route-memory intelligence.
+This repository contains the research prototype, Jupyter Notebook experiments, documentation, and sample outputs used while developing the architecture.
 
 ---
 
-## Core Idea
+## Current Prototype Scope
+
+This project is currently a **notebook-based research prototype**.
+
+It is not yet a production Android/mobile application and it is not a certified navigation or mobility system.
+
+The current implementation mainly tests:
 
 ```text
-Camera / Route Video
-        ↓
+Route Video
+    ↓
 Frame Extraction
-        ↓
-Static Visual Encoder
-        ↓
-Visual Embeddings
-        ↓
-Route Memory
-        ↓
-DTW Synchronization
-        ↓
-Shared-Path Graph Learning
-        ↓
-LEFT / RIGHT Branch Intelligence
-        ↓
-Uncertainty Handling
-        ↓
-Object Safety Layer
-        ↓
-Risk Engine
-        ↓
-Guidance Engine
+    ↓
+Visual Embedding
+    ↓
+Route Similarity
+    ↓
+DTW Alignment
+    ↓
+Common Path Detection
+    ↓
+Branch Classification
 ```
 
 ---
 
-## Final System Architecture
+## Why This Project Exists
+
+Most assistive vision systems focus mainly on object detection.
+
+Example:
 
 ```text
-┌──────────────────────────────────────┐
-│            Input Capture             │
-│        Camera / Route Videos         │
-└──────────────────┬───────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│           Frame Extraction           │
-│       120 Frames / 20 Seconds        │
-└──────────────────┬───────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│        Static Visual Encoder         │
-│            EfficientNetB0            │
-└──────────────────┬───────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│         Embedding Creation           │
-│         Route Memory System          │
-└──────────────────┬───────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│          DTW Synchronization         │
-│       Shared-Prefix Alignment        │
-└──────────────────┬───────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│        Common Path Detection         │
-│     Junction / Divergence Logic      │
-└──────────────────┬───────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│          Branch Graph Builder        │
-│       LEFT Branch / RIGHT Branch     │
-└──────────────────┬───────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│       Query Route Classification     │
-│      Known / Uncertain / Unknown     │
-└──────────────────┬───────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│      Object Detection and Tracking   │
-│          Risk Intelligence           │
-└──────────────────┬───────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│            Guidance Engine           │
-│       Voice / Haptic Navigation      │
-└──────────────────────────────────────┘
+Camera Frame → Object Detector → "Chair detected"
 ```
 
----
+That is useful, but it does not understand whether the user is on the correct route.
 
-## Research Contributions
-
-### 1. GPS-Free Route Memory
-
-The system primarily relies on visual route memory instead of GPS. Routes are represented using visual embeddings and similarity-based matching.
-
-### 2. Frozen Visual Encoder
-
-The visual encoder is not retrained for every new route. It is used only for embedding generation.
-
-Current prototype encoder:
+VXN-RAMNet experiments with a different idea:
 
 ```text
-EfficientNetB0
+Can a system remember repeated visual routes
+and understand where two paths share a common section
+before splitting into different branches?
 ```
-
-Planned mobile encoders:
-
-```text
-EfficientNet-Lite0
-MobileNetV3Large TFLite
-```
-
-### 3. Multi-Route Classification
-
-Route scoring is based on three similarity signals:
-
-```text
-Final Route Score =
-    0.50 × Best Similarity
-  + 0.30 × Top-3 Mean Similarity
-  + 0.20 × Centroid Similarity
-```
-
-Decision states:
-
-```text
-CONFIRMED_ROUTE
-UNCERTAIN_ROUTE
-UNKNOWN_ROUTE
-```
-
-### 4. Evidence-Based Uncertainty Handling
-
-Instead of making a decision from one frame, the system collects more evidence when route confidence is unclear.
-
-```text
-1 frame → 3 frames → 5 frames → 7 frames → 9 frames
-```
-
-The final decision uses average score, vote stability, and confidence gap.
-
-### 5. Unknown Route Auto-Learning
-
-Unknown routes can be saved as new memory without retraining the model.
-
-```text
-UNKNOWN_ROUTE
-      ↓
-Save Frames
-      ↓
-Generate Embeddings
-      ↓
-Update Route Memory
-      ↓
-Recognize Next Time
-```
-
----
-
-## Shared-Prefix Branch Graph Learning
-
-One of the major components of VXN-RAMNet is **Shared-Prefix Branch Graph Learning**.
-
-Many real routes share the same starting path before splitting into different destinations.
 
 Example:
 
@@ -245,203 +83,230 @@ College
    ↓
 Common Path
    ↓
-Junction_A
+Junction
    ├── LEFT  → Home
    └── RIGHT → Tuition
 ```
 
-Instead of storing both full routes separately, VXN-RAMNet detects the common path, identifies the divergence point, and builds a graph structure.
+---
+
+## Core Idea
+
+The system uses a frozen visual encoder to convert route frames into embeddings.
+
+The model is not retrained for each route. Instead, the route memory grows by storing embeddings.
+
+```text
+Video Frames
+    ↓
+Frozen Visual Encoder
+    ↓
+Embeddings
+    ↓
+Route / Branch Memory
+    ↓
+Similarity-Based Decision
+```
 
 ---
 
-## DTW Synchronization
+## Main Features Implemented
 
-A major issue in route video comparison is that two route videos may not reach the transition point at the same time.
+### 1. Route Frame Extraction
 
-Incorrect assumption:
+Route videos are clipped logically to the first 20 seconds and sampled into evenly spaced frames.
+
+Current experiment setting:
+
+```text
+120 frames per video
+```
+
+This helps capture the route from start to end.
+
+---
+
+### 2. Visual Embedding Generation
+
+Frames are converted into embeddings using a frozen CNN encoder.
+
+Current prototype model:
+
+```text
+EfficientNetB0
+```
+
+The encoder is used only for feature extraction.
+
+No route-specific model retraining is performed.
+
+---
+
+### 3. Route Similarity Matching
+
+The prototype uses cosine similarity between normalized embeddings.
+
+Earlier experiments tested simple route matching using:
+
+- best similarity
+- top-k similarity
+- centroid similarity
+- average route score
+
+---
+
+### 4. Unknown Route Handling
+
+If a route does not match existing memory strongly, the system can mark it as an unknown route.
+
+The unknown route can later be saved as a new route memory by storing its embeddings.
+
+This is still experimental and needs more testing.
+
+---
+
+### 5. Shared-Prefix Branch Graph Learning
+
+This is the main current experiment.
+
+Two route videos are used:
+
+```text
+left_route.mp4   → common path, then LEFT branch
+right_route.mp4  → common path, then RIGHT branch
+```
+
+The system tries to detect:
+
+- the shared route section
+- the divergence point
+- the LEFT branch memory
+- the RIGHT branch memory
+
+Final learned structure:
+
+```text
+Common Path
+    ↓
+Junction
+    ├── LEFT Branch
+    └── RIGHT Branch
+```
+
+---
+
+### 6. DTW-Based Video Synchronization
+
+A major issue in route videos is that the transition point may occur at different times.
+
+Example:
+
+```text
+LEFT route transition  → around 10 seconds
+RIGHT route transition → around 7-8 seconds
+```
+
+So direct frame-to-frame matching is not reliable.
+
+Instead of comparing:
 
 ```text
 left_frame_18 ↔ right_frame_18
 ```
 
-This fails when:
-
-- walking speed differs
-- transition timing differs
-- camera pacing differs
-
-VXN-RAMNet uses Dynamic Time Warping-style alignment:
+the updated prototype uses Dynamic Time Warping style alignment:
 
 ```text
 left_frame_i ↔ right_frame_j
 ```
 
-This allows the system to synchronize visually similar route sections even when the transition occurs at different timestamps.
+This helps synchronize route videos even when walking speed is different.
 
 ---
 
-## Divergence and Junction Detection
+### 7. Query Branch Classification
 
-After DTW synchronization:
+A third video is used as a query route:
 
 ```text
-High Similarity
-    → Common Path
-
-Stable Similarity Drop
-    → Route Divergence
+query_route.mp4
 ```
 
-Detected metadata includes:
+The system classifies it as:
 
 ```text
-left_transition_index
-right_transition_index
-divergence_k
-left_divergence_start
-right_divergence_start
-branch_split_metadata
-```
-
-For validation, the system displays:
-
-```text
-3 frames before transition
-1 transition frame
-3 frames after transition
-```
-
-for both LEFT and RIGHT route videos.
-
----
-
-## Branch Classification
-
-A query route can be classified as:
-
-```text
-LEFT_BRANCH_HOME
-RIGHT_BRANCH_TUITION
+LEFT_BRANCH
+RIGHT_BRANCH
 UNCERTAIN_BRANCH
 UNKNOWN_BRANCH
-UNKNOWN_OR_WEAK_COMMON_PATH
 ```
 
-Classification flow:
-
-```text
-Extract Query Frames
-        ↓
-Generate Query Embeddings
-        ↓
-Detect Query Common-Path End
-        ↓
-Select Branch Evidence
-        ↓
-Compare LEFT vs RIGHT Branch Memory
-        ↓
-Final Branch Prediction
-```
-
-### Strong Branch Override
-
-If the branch evidence is strong, the system does not reject the result only because the common path score is weak.
-
-Example:
-
-```text
-Common Score = 0.56
-LEFT Score   = 0.81
-RIGHT Score  = 0.67
-```
-
-Correct output:
-
-```text
-LEFT_BRANCH_HOME
-```
-
-Reason: the branch evidence is significantly stronger.
+The query classification uses branch evidence after the detected common path.
 
 ---
 
-## Object Safety Layer
+## Current Workflow
 
-Object detection is intentionally independent from route memory.
+The current notebook workflow is split into three main cells.
 
-It continues during:
+### Cell 1: Frame Extraction
 
-- confirmed routes
-- uncertain routes
-- unknown routes
-- wrong-branch situations
-
-Planned object detection models:
+Input:
 
 ```text
-YOLOv8n TFLite
-MobileNet-SSD
-EfficientDet-Lite
+videos/
+  left_route.mp4
+  right_route.mp4
+  query_route.mp4
 ```
 
-This keeps safety warnings active even when route memory is uncertain.
-
----
-
-## Risk Intelligence Engine
-
-The risk engine combines:
-
-- route confidence
-- branch confidence
-- uncertainty state
-- unknown-route state
-- wrong-branch state
-- object detection output
-- motion or tracking information
-
-| Risk Level | Meaning |
-|---|---|
-| SAFE | Normal navigation |
-| CAUTION | Uncertain or unknown state |
-| HIGH_RISK | Obstacle or wrong branch |
-| CRITICAL / STOP | Immediate danger |
-
----
-
-## Guidance Engine
-
-Example outputs:
+Output:
 
 ```text
-Take left for Home.
-Take right for Tuition.
-Wrong branch detected.
-Unknown route detected.
-Obstacle ahead.
-Stop. Obstacle ahead.
+vxn_branch_frames_dtw/
+  left_route/
+  right_route/
+  query_route/
 ```
-
-Planned guidance features:
-
-- anti-spam cooldown
-- adaptive voice guidance
-- haptic navigation feedback
-- priority-based warning system
 
 ---
 
-## Current Experimental Pipeline
+### Cell 2: Graph Memory Creation
 
-| Stage | Description |
-|---|---|
-| Stage 1 | Route frame extraction and embedding creation |
-| Stage 2 | Route memory generation and centroid storage |
-| Stage 3 | Unknown-route detection and memory update |
-| Stage 4 | DTW-based shared-prefix graph learning |
-| Stage 5 | LEFT/RIGHT query branch classification |
-| Stage 6 | Transition-frame verification |
-| Stage 7 | Risk and guidance logic design |
+This cell:
+
+- loads extracted frames
+- creates embeddings
+- builds a similarity matrix
+- applies DTW alignment
+- detects the divergence point
+- creates common path, LEFT branch, and RIGHT branch memory
+- saves graph memory
+
+Output files:
+
+```text
+vxn_branch_graph_memory_dtw.npz
+vxn_branch_graph_metadata_dtw.json
+```
+
+---
+
+### Cell 3: Query Classification
+
+This cell:
+
+- loads the query video frames
+- creates query embeddings
+- detects the query common-path end
+- compares branch evidence with LEFT and RIGHT memories
+- outputs the predicted branch
+
+Output file:
+
+```text
+vxn_branch_query_classification_report_dtw.json
+```
 
 ---
 
@@ -451,146 +316,107 @@ Planned guidance features:
 VXN-RAMNet/
 │
 ├── notebooks/
-│   ├── route_memory_experiments.ipynb
-│   ├── unknown_route_learning.ipynb
-│   └── dtw_branch_graph_learning.ipynb
+│   └── experimental notebooks
 │
 ├── docs/
-│   ├── architecture.md
-│   ├── build_manual.md
-│   └── system_flow.md
-│
-├── diagrams/
-│   └── architecture_flow.png
-│
-├── assets/
-│   └── sample_frames/
+│   └── architecture and build notes
 │
 ├── sample_results/
-│   ├── classification_reports/
-│   └── transition_outputs/
+│   └── reports and output examples
 │
-├── research_notes/
-│
-├── demo_outputs/
+├── assets/
+│   └── sample frames or diagrams
 │
 ├── requirements.txt
-├── LICENSE
-└── README.md
+├── README.md
+└── LICENSE
 ```
+
+The exact structure may change as the prototype improves.
 
 ---
 
 ## Tech Stack
 
-| Technology | Purpose |
+| Tool | Purpose |
 |---|---|
-| Python | Core research development |
-| TensorFlow | Visual encoder and model inference |
-| OpenCV | Video processing and frame extraction |
-| NumPy | Embedding operations and similarity search |
-| Pandas | Result tables and analysis |
-| Pillow | Image processing |
-| Matplotlib | Visual verification and plots |
-| Jupyter Notebook | Research experimentation |
+| Python | Main development language |
+| Jupyter Notebook | Experimentation |
+| TensorFlow / Keras | Visual encoder |
+| EfficientNetB0 | Frame embedding model |
+| OpenCV | Video and frame processing |
+| NumPy | Embedding and similarity operations |
+| Pandas | Result tables |
+| Matplotlib | Visualization |
+| Pillow | Image handling |
 
 ---
 
-## Core Research Concepts
+## Example Outputs
 
-- Computer Vision
-- Visual Embeddings
-- Cosine Similarity
-- Dynamic Time Warping
-- Route Memory Systems
-- Graph-Based Navigation
-- Shared-Prefix Learning
-- Evidence Aggregation
-- Uncertainty Reasoning
-- Risk-Aware Guidance
-- Edge AI Deployment
-
----
-
-## Runtime Design Goals
-
-| Component | Target Runtime |
-|---|---|
-| Camera Preview | 10–15 FPS |
-| Route Classification | 2–3 FPS |
-| Object Detection | 1–2 FPS |
-| Risk Engine | 2–5 FPS |
-| Guidance | Event-Based |
-
-Optimization principles:
+The system generates outputs such as:
 
 ```text
-Load encoder once
-Load memory once
-Use .npz memory files
-Use single-frame embeddings
-Use matrix dot-product similarity
-Avoid runtime plotting
-Use TFLite for mobile deployment
+Detected transition index
+LEFT branch score
+RIGHT branch score
+Query classification result
+Common path similarity curve
+DTW alignment visualization
+Transition context frames
 ```
 
----
-
-## Android Deployment Direction
-
-The research prototype is notebook-based, but the architecture is mobile-implementable.
-
-Recommended Android stack:
+Transition context frames are displayed for verification:
 
 ```text
-Kotlin
-CameraX
-TensorFlow Lite / LiteRT
-Room or SQLite
-TextToSpeech
-Vibration / Haptics
+3 frames before transition
+1 transition frame
+3 frames after transition
 ```
 
-Mobile design split:
-
-```text
-Learning Mode
-    Frame extraction
-    DTW synchronization
-    Graph memory creation
-
-Navigation Mode
-    Live frame embedding
-    Branch classification
-    Object safety layer
-    Risk engine
-    Guidance output
-```
+This helps check whether the detected divergence point is visually meaningful.
 
 ---
 
-## Current Limitations
+## Runtime Target
 
-- Sensitive to major lighting changes
-- Similar-looking branches may confuse embeddings
-- Assumes shared-prefix structure for branch graph learning
-- Requires more real-world testing
-- Currently implemented as a research notebook prototype
-- Not a certified mobility or medical navigation system
+The long-term target is to make the system lightweight enough for assistive use.
 
-> This project is a research-oriented prototype and should not be used as a certified navigation or safety device.
+Planned runtime goal:
 
----
-
-## Future Research Directions
-
-| Version | Planned Upgrade |
+| Component | Target |
 |---|---|
-| Version 2 | Recursive graph updates and persistent junction memory |
-| Version 3 | DFS-style graph traversal and stack-based route reasoning |
-| Version 4 | Mobile deployment with TFLite optimization |
-| Version 5 | Real-time assistive navigation with adaptive guidance |
-| Version 6 | Larger-scale environment graph learning and evaluation |
+| Camera preview | 10-15 FPS |
+| Route / branch classification | 2-3 FPS |
+| Object detection | 1-2 FPS |
+| Risk and guidance logic | event-based |
+
+The notebook version is not optimized for mobile runtime yet.
+
+---
+
+## Future Work
+
+Planned improvements:
+
+- improve branch classification robustness
+- test on more real-world route videos
+- add better unknown-route learning
+- add wrong-branch detection using destination selection
+- integrate object detection as a safety layer
+- optimize the encoder using TensorFlow Lite
+- explore Android implementation using CameraX and TFLite
+- evaluate performance across lighting, blur, and route variation
+
+---
+
+## Important Note
+
+This project is a research prototype.
+
+It is not a certified navigation system, safety device, or medical assistive product.
+
+The current goal is to test whether visual route memory and graph-based route reasoning can support personalized assistive navigation.
 
 ---
 
@@ -603,37 +429,11 @@ BCA (Hons.) Data Science Student
 Research interests:
 
 - Assistive AI
-- Visual Navigation
-- Graph Intelligence
 - Computer Vision
-- Real-Time AI Systems
+- Visual Navigation
+- Graph-Based Navigation
 - Edge AI
-- Reinforcement Learning
-
----
-
-## Final Research Statement
-
-> VXN-RAMNet is a GPS-free, no-retraining, graph-based visual navigation intelligence architecture that combines static visual embeddings, route memory, DTW synchronization, branch-aware graph learning, uncertainty reasoning, and risk-guided assistive navigation into a unified research-oriented prototype system.
-
----
-
-## Repository Topics
-
-```text
-computer-vision
-assistive-technology
-deep-learning
-graph-learning
-navigation-system
-visual-navigation
-route-memory
-edge-ai
-dynamic-time-warping
-real-time-ai
-research-project
-graph-based-navigation
-```
+- Real-Time AI Systems
 
 ---
 
