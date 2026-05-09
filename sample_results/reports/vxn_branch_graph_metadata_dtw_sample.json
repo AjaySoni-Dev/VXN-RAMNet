@@ -1,0 +1,39 @@
+{
+  "system": "VXN-RAMNet",
+  "architecture": "DTW-Synchronized Shared-Prefix Branch Graph Learning",
+  "gps_used": false,
+  "model_retraining_used": false,
+  "model": "EfficientNetB0",
+  "left_route_meaning": "College to Home, LEFT branch after divergence",
+  "right_route_meaning": "College to Tuition, RIGHT branch after divergence",
+  "thresholds": {
+    "COMMON_THRESHOLD": 0.76,
+    "DIVERGENCE_THRESHOLD": 0.66,
+    "STABLE_DROP_COUNT": 4,
+    "MIN_COMMON_ALIGNED_PAIRS": 8
+  },
+  "dtw_result": {
+    "transition_k": 66,
+    "divergence_k": 67,
+    "left_transition_index": 59,
+    "right_transition_index": 63,
+    "left_divergence_start": 60,
+    "right_divergence_start": 64,
+    "method": "dtw_stable_smoothed_drop"
+  },
+  "graph": {
+    "root": "College",
+    "common_path": "College_to_Junction",
+    "junction": "Junction_A",
+    "transitions": {
+      "LEFT": "Home",
+      "RIGHT": "Tuition"
+    }
+  },
+  "component_counts": {
+    "COMMON_PATH": 67,
+    "LEFT_BRANCH_HOME": 60,
+    "RIGHT_BRANCH_TUITION": 56
+  },
+  "created_at_unix": 1778344285.449648
+}

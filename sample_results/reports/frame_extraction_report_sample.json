@@ -1,0 +1,42 @@
+{
+  "system": "VXN-RAMNet",
+  "stage": "dtw_frame_extraction",
+  "max_video_seconds": 20,
+  "frames_per_video": 120,
+  "created_at_unix": 1778344262.9324434,
+  "videos": {
+    "left_route": {
+      "video_path": "left_route.mp4",
+      "fps": 24.833333333333332,
+      "original_duration_seconds": 26.73825503355705,
+      "used_duration_seconds": 20,
+      "original_total_frames": 664,
+      "used_frame_count": 496,
+      "requested_frames": 120,
+      "saved_frames": 120,
+      "output_folder": "vxn_branch_frames_dtw\\left_route"
+    },
+    "right_route": {
+      "video_path": "right_route.mp4",
+      "fps": 24.833333333333332,
+      "original_duration_seconds": 23.23489932885906,
+      "used_duration_seconds": 20,
+      "original_total_frames": 577,
+      "used_frame_count": 496,
+      "requested_frames": 120,
+      "saved_frames": 120,
+      "output_folder": "vxn_branch_frames_dtw\\right_route"
+    },
+    "query_route": {
+      "video_path": "query_route.mp4",
+      "fps": 24.833333333333332,
+      "original_duration_seconds": 24.684563758389263,
+      "used_duration_seconds": 20,
+      "original_total_frames": 613,
+      "used_frame_count": 496,
+      "requested_frames": 120,
+      "saved_frames": 120,
+      "output_folder": "vxn_branch_frames_dtw\\query_route"
+    }
+  }
+}
