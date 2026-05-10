@@ -2,15 +2,45 @@
 
 This folder is reserved for sample videos or anonymized test data for the VXN-RAMNet research prototype.
 
-VXN-RAMNet uses route videos to test visual route memory, shared-path detection, DTW-based synchronization, and LEFT/RIGHT branch classification.
+VXN-RAMNet uses route videos to test:
+
+- visual route memory
+- shared-path detection
+- DTW-based synchronization
+- LEFT/RIGHT branch classification
+- one-video backtracking branch graph learning
+
+Raw personal route videos are not included by default for privacy reasons.
 
 ---
 
 ## Purpose of This Folder
 
-The `sample_data/` folder is used for input videos that can be tested with the notebooks.
+The `sample_data/` folder is used for optional input videos that can be tested with the notebooks.
 
-The current main experiment expects three route videos:
+The repository can be understood without public videos because it already includes:
+
+- notebooks
+- documentation
+- sample results
+- JSON reports
+- console output samples
+
+If videos are added later, they should be short, anonymized, and safe for public sharing.
+
+---
+
+## Supported Notebook Experiments
+
+### 1. Two-Video Shared-Prefix DTW Experiment
+
+Notebook:
+
+```text
+notebooks/03_shared_prefix_branch_graph_dtw.ipynb
+```
+
+Expected video files:
 
 ```text
 left_route.mp4
@@ -18,27 +48,15 @@ right_route.mp4
 query_route.mp4
 ```
 
-These videos are used by the notebook:
-
-```text
-notebooks/03_shared_prefix_branch_graph_dtw.ipynb
-```
-
----
-
-## Expected Video Files
+Meaning:
 
 | File Name | Purpose |
 |---|---|
 | `left_route.mp4` | First route video. It starts from the common path and later moves into the LEFT branch. |
 | `right_route.mp4` | Second route video. It starts from the same common path and later moves into the RIGHT branch. |
-| `query_route.mp4` | Test video. The system tries to classify it as LEFT branch, RIGHT branch, uncertain, or unknown. |
+| `query_route.mp4` | Test route video. The system tries to classify it as LEFT, RIGHT, uncertain, or unknown. |
 
----
-
-## Example Route Meaning
-
-A typical experiment may look like this:
+Example route structure:
 
 ```text
 left_route.mp4
@@ -51,7 +69,7 @@ query_route.mp4
 College → Common Path → Junction → either LEFT or RIGHT
 ```
 
-The system tries to learn this structure:
+The notebook tries to learn:
 
 ```text
 Common Path
@@ -63,11 +81,177 @@ Junction
 
 ---
 
+### 2. One-Video Backtracking Branch Graph Experiment
+
+Notebook:
+
+```text
+notebooks/04_backtracking_branch_graph_learning.ipynb
+```
+
+Expected video files:
+
+```text
+backtracking_learning_route.mp4
+query_route_1.mp4
+query_route_2.mp4
+```
+
+Meaning:
+
+| File Name | Purpose |
+|---|---|
+| `backtracking_learning_route.mp4` | One learning video where the user goes from root to junction, takes the first branch, backtracks to the junction, and then takes the second branch. |
+| `query_route_1.mp4` | First query route video to classify. |
+| `query_route_2.mp4` | Second query route video to classify. |
+
+Example learning route:
+
+```text
+backtracking_learning_route.mp4
+College → Junction → First Branch → Backtrack → Junction → Second Branch
+```
+
+The notebook tries to learn:
+
+```text
+Root / College
+    ↓
+Common Path
+    ↓
+Junction
+    ├── First Branch
+    └── Second Branch
+```
+
+Important note:
+
+In the backtracking experiment, branch names are assigned by exploration order.
+
+```text
+First branch visited before backtracking  = first branch memory
+Second branch visited after backtracking  = second branch memory
+```
+
+If your recording order is different, update the branch label variables inside the notebook.
+
+---
+
+## Recommended Folder Usage
+
+You can place videos directly inside `sample_data/`:
+
+```text
+VXN-RAMNet/
+│
+├── sample_data/
+│   ├── left_route.mp4
+│   ├── right_route.mp4
+│   ├── query_route.mp4
+│   ├── backtracking_learning_route.mp4
+│   ├── query_route_1.mp4
+│   └── query_route_2.mp4
+│
+└── notebooks/
+    ├── 03_shared_prefix_branch_graph_dtw.ipynb
+    └── 04_backtracking_branch_graph_learning.ipynb
+```
+
+Some notebook versions may expect videos inside a local `videos/` folder:
+
+```text
+VXN-RAMNet/
+│
+├── videos/
+│   ├── left_route.mp4
+│   ├── right_route.mp4
+│   ├── query_route.mp4
+│   ├── backtracking_learning_route.mp4
+│   ├── query_route_1.mp4
+│   └── query_route_2.mp4
+│
+└── notebooks/
+    ├── 03_shared_prefix_branch_graph_dtw.ipynb
+    └── 04_backtracking_branch_graph_learning.ipynb
+```
+
+If needed, update the video path variables inside the notebook.
+
+---
+
+## Current Notebook Input Names
+
+### For `03_shared_prefix_branch_graph_dtw.ipynb`
+
+```python
+LEFT_ROUTE_VIDEO_NAME = "left_route.mp4"
+RIGHT_ROUTE_VIDEO_NAME = "right_route.mp4"
+QUERY_ROUTE_VIDEO_NAME = "query_route.mp4"
+```
+
+### For `04_backtracking_branch_graph_learning.ipynb`
+
+```python
+LEARNING_VIDEO_NAME = "backtracking_learning_route.mp4"
+
+QUERY_VIDEO_NAMES = [
+    "query_route_1.mp4",
+    "query_route_2.mp4",
+]
+```
+
+If your files have different names, either rename the files or update the notebook variables.
+
+---
+
+## Video Recording Guidelines
+
+For better results, record videos carefully.
+
+Recommended practices:
+
+- walk slowly
+- keep the camera stable
+- avoid sudden turns
+- avoid heavy blur
+- record in good lighting
+- keep the camera facing forward as much as possible
+- pause briefly near important junctions
+- avoid recording faces, number plates, or private places
+
+For the backtracking experiment, the learning video should follow this structure:
+
+```text
+start/root
+    ↓
+junction
+    ↓
+first branch
+    ↓
+backtrack to junction
+    ↓
+second branch
+```
+
+Recommended learning video length:
+
+```text
+45 seconds or less
+```
+
+Recommended query video length:
+
+```text
+20 seconds or less
+```
+
+The notebooks use only the configured duration from each video.
+
+---
+
 ## Important Privacy Note
 
-Raw personal route videos are not included in this repository by default.
-
-Route videos may contain private or sensitive information such as:
+Raw personal route videos may contain sensitive information such as:
 
 - faces
 - vehicle numbers
@@ -76,12 +260,15 @@ Route videos may contain private or sensitive information such as:
 - street views
 - building names
 - personal movement patterns
+- private route patterns
 
-For this reason, public sample videos should only be added if they are safe to share.
+For this reason, raw personal videos are not included in this repository by default.
+
+Only upload videos if they are safe for public sharing.
 
 ---
 
-## Guidelines for Adding Sample Videos
+## Guidelines for Adding Public Sample Videos
 
 If you add sample videos to this folder, make sure they are:
 
@@ -94,69 +281,15 @@ If you add sample videos to this folder, make sure they are:
 - free from sensitive location details
 - recorded only for demonstration or testing
 
-Recommended video length:
-
-```text
-20 seconds or less
-```
-
-The notebooks use only the first 20 seconds of each video.
-
----
-
-## How to Use This Folder
-
-Place the videos inside this folder or copy them into a local `videos/` folder before running the notebooks.
-
-Recommended local structure:
-
-```text
-VXN-RAMNet/
-│
-├── sample_data/
-│   ├── left_route.mp4
-│   ├── right_route.mp4
-│   └── query_route.mp4
-│
-└── notebooks/
-    └── 03_shared_prefix_branch_graph_dtw.ipynb
-```
-
-Some notebook versions may expect this structure instead:
-
-```text
-VXN-RAMNet/
-│
-├── videos/
-│   ├── left_route.mp4
-│   ├── right_route.mp4
-│   └── query_route.mp4
-│
-└── notebooks/
-    └── 03_shared_prefix_branch_graph_dtw.ipynb
-```
-
-If needed, update the video path variables inside the notebook.
-
----
-
-## Current Notebook Input Names
-
-The main DTW branch graph notebook uses these expected names:
-
-```python
-LEFT_ROUTE_VIDEO_NAME = "left_route.mp4"
-RIGHT_ROUTE_VIDEO_NAME = "right_route.mp4"
-QUERY_ROUTE_VIDEO_NAME = "query_route.mp4"
-```
-
-If your files have different names, either rename them or update the notebook variables.
+Do not upload private real route videos unless they have been reviewed and are safe to share.
 
 ---
 
 ## Generated Outputs
 
-When the notebook runs, it can generate output folders and files such as:
+When the notebooks run, they may generate output folders and files.
+
+### Outputs from `03_shared_prefix_branch_graph_dtw.ipynb`
 
 ```text
 vxn_branch_frames_dtw/
@@ -165,9 +298,23 @@ vxn_branch_graph_metadata_dtw.json
 vxn_branch_query_classification_report_dtw.json
 ```
 
+### Outputs from `04_backtracking_branch_graph_learning.ipynb`
+
+```text
+vxn_backtracking_graph_outputs/
+├── frames/
+├── frame_extraction_report.json
+├── vxn_backtracking_embeddings.npz
+├── vxn_backtracking_graph_memory.npz
+├── vxn_backtracking_graph_metadata.json
+├── query_reports/
+├── vxn_backtracking_all_query_summary.json
+└── vxn_backtracking_final_summary.json
+```
+
 These are generated experiment outputs.
 
-In most cases, generated frame folders should not be committed to GitHub because they can be large and may contain private visual information.
+Generated frame folders should usually not be committed to GitHub because they can be large and may contain private visual information.
 
 ---
 
@@ -185,6 +332,9 @@ Optional, only if privacy-safe:
 sample_data/left_route.mp4
 sample_data/right_route.mp4
 sample_data/query_route.mp4
+sample_data/backtracking_learning_route.mp4
+sample_data/query_route_1.mp4
+sample_data/query_route_2.mp4
 ```
 
 Not recommended for public upload:
@@ -194,6 +344,7 @@ private route videos
 raw personal route recordings
 generated frame folders
 large extracted image datasets
+video files showing faces, homes, number plates, or private locations
 ```
 
 ---
@@ -211,7 +362,16 @@ videos/
 raw_videos/
 ```
 
-If you decide to upload safe demo videos, remove or modify those rules.
+Also ignore generated experiment outputs:
+
+```text
+vxn_branch_frames_dtw/
+vxn_backtracking_graph_outputs/
+extracted_frames/
+vxn_extracted_frames/
+```
+
+If you decide to upload safe demo videos, remove or modify the video ignore rules.
 
 ---
 
@@ -226,6 +386,7 @@ The main project can still be understood through:
 - sample results
 - JSON reports
 - console output samples
+- research notes
 
 Public route videos are optional and should only be included after privacy review.
 
