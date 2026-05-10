@@ -424,7 +424,7 @@ The current goal is to test whether visual route memory and graph-based route re
 
 **Ajay Soni**
 
-BCA (Hons.) Data Science Student
+BCA (Hons.) Data Science Student at Chandigarh University, Unnao
 
 Research interests:
 
