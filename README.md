@@ -422,7 +422,7 @@ The current goal is to test whether visual route memory and graph-based route re
 
 ## Author
 
-**Ajay Soni**
+**Ajay Soni** 
 
 BCA (Hons.) Data Science Student at Chandigarh University, Unnao
 
