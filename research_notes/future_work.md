@@ -1,380 +1,420 @@
 # Future Work
 
-This document outlines planned improvements for the VXN-RAMNet research prototype.
+This document lists the actual future work required to make VXN-RAMNet more reliable, testable, and closer to practical use.
 
-The project is currently notebook-based and focuses on visual route memory, DTW synchronization, shared-prefix branch graph learning, and query branch classification. Future work will focus on robustness, graph expansion, object safety, and mobile deployment.
+The goal is not to overstate the project. The current repo is a notebook-based research prototype. Future work should focus on measurable improvements, better evaluation, cleaner code, and realistic deployment steps.
 
 ---
 
-## 1. Improve Dataset Quality
+## 1. Create a Proper Evaluation Dataset
 
-The current experiments use a small number of route videos.
+The first major future task is to test the system on more route videos.
 
-Future work should include more diverse test data:
+Needed data:
 
-- multiple routes
-- multiple query videos per route
-- different lighting conditions
-- different walking speeds
-- different camera angles
-- indoor and outdoor routes
-- repeated recordings on different days
+- multiple root paths
+- multiple junctions
+- multiple left/right branch examples
+- multiple backtracking videos
+- query videos recorded on different days
+- indoor and outdoor videos
+- low-light videos
+- shaky videos
 - similar-looking branches
-- unknown routes
+- unknown-route videos
+- failure-case videos
 
-This will help evaluate whether the system generalizes beyond the initial experiment.
+Without a larger dataset, the system cannot claim general reliability.
 
 ---
 
-## 2. Create a Structured Evaluation Protocol
+## 2. Build an Evaluation Notebook
 
-The project needs a clear evaluation process.
+Add a notebook such as:
 
-Planned metrics:
+```text
+notebooks/05_evaluation_summary.ipynb
+```
 
-| Metric | Purpose |
+It should measure:
+
+| Metric | Why It Matters |
 |---|---|
-| Route classification accuracy | Measures correct route prediction |
-| Branch classification accuracy | Measures LEFT/RIGHT decision quality |
-| Unknown-route detection rate | Measures unknown route handling |
-| False unknown rate | Checks if known routes are wrongly rejected |
-| Transition detection error | Measures divergence point accuracy |
-| Average inference time | Measures runtime performance |
-| Memory size growth | Tracks memory scalability |
+| Branch classification accuracy | Checks LEFT/RIGHT or first/second branch correctness |
+| Unknown-route detection rate | Checks whether unseen routes are rejected |
+| False unknown rate | Checks whether known routes are wrongly rejected |
+| Transition detection error | Checks junction/divergence accuracy |
+| Query evidence window quality | Checks whether branch frames are selected correctly |
+| Average inference time | Measures speed |
+| Failure cases | Shows where the system breaks |
 
-A future evaluation notebook can generate a summary report for all test routes.
+The output should be a table, not only printed text.
 
 ---
 
-## 3. Improve Transition Detection
+## 3. Improve Backtracking Detection
 
-Current divergence detection uses smoothed similarity drops after DTW alignment.
+The new backtracking notebook works experimentally, but it needs stronger validation.
 
 Future improvements:
 
-- adaptive thresholds
-- multi-window transition scoring
-- confidence score for transition point
-- temporal smoothing
-- visual scene-change detection
-- optical flow support
-- transition uncertainty region instead of single index
+- better junction revisit detection
+- better turnaround detection
+- confidence score for each detected segment
+- support for longer videos
+- support for multiple backtracking points
+- failure detection when junction cannot be found
+- visual warning when detection confidence is low
+- optional manual correction for detected junction frames
 
-Instead of one transition frame, the system may store a transition zone:
-
-```text
-transition_start
-transition_center
-transition_end
-```
-
-This may be more reliable for real-world route splits.
+The system should not silently accept a wrong junction split.
 
 ---
 
-## 4. Expand Branch Graph Learning
+## 4. Add Semi-Automatic Correction Mode
 
-The current graph experiment supports a simple structure:
+Fully automatic graph learning may fail in some videos.
 
-```text
-Common Path
-    ↓
-Junction
-    ├── LEFT Branch
-    └── RIGHT Branch
-```
+A practical next step is semi-automatic correction.
 
-Future versions should support:
-
-- more than two branches
-- straight branch
-- curved branch
-- nested junctions
-- route merging
-- loops
-- dead ends
-- branch re-entry
-- multi-destination graphs
-
-Example future graph:
+Example:
 
 ```text
-Root
-  ↓
-Common Path
-  ↓
-Junction_A
-  ├── LEFT  → Home
-  ├── RIGHT → Tuition
-  └── STRAIGHT → Market
+Detected first junction: frame 60
+Detected return junction: frame 193
+Detected turnaround: frame 134
+
+User can accept or edit these values.
 ```
+
+This would make experiments more reliable while automatic detection is still improving.
 
 ---
 
-## 5. Add Backtracking-Based Exploration
+## 5. Improve Query Evidence Selection
 
-Current graph learning uses full videos from the root path.
-
-Future version:
-
-```text
-Start at root
-    ↓
-Record LEFT branch
-    ↓
-Backtrack to junction
-    ↓
-Record RIGHT branch
-```
-
-This would reduce the need to record the full common path repeatedly.
-
-Planned features:
-
-- backtracking state
-- visited node recognition
-- return-to-junction detection
-- branch completion status
-- graph update after each branch
-
----
-
-## 6. Add DFS-Style Graph Exploration
-
-A later research direction is structured graph exploration inspired by DFS.
-
-Concept:
-
-```text
-Explore LEFT first
-    ↓
-Go deeper if another junction exists
-    ↓
-Backtrack when branch ends
-    ↓
-Explore RIGHT branch
-```
-
-This can build a topological graph in a deterministic way.
-
-Required components:
-
-- traversal stack
-- current node tracking
-- branch completion flags
-- parent-child transitions
-- visited node detection
-- graph consistency checks
-
----
-
-## 7. Improve Unknown Route Learning
-
-Unknown-route learning should become more structured.
+The latest notebook improved query classification by selecting later branch windows.
 
 Future improvements:
 
-- detect unknown route more reliably
+- compare multiple branch windows
+- score branch-window stability
+- reject windows that still look like common path
+- use vote-based prediction across windows
+- store selected evidence frames in reports
+- add confidence labels such as HIGH, MEDIUM, LOW
+- detect when query video does not contain enough branch evidence
+
+This is important because wrong evidence selection can make the classifier look correct or incorrect for the wrong reason.
+
+---
+
+## 6. Improve Uncertainty Handling
+
+The current uncertainty logic is threshold-based.
+
+Future uncertainty handling should include:
+
+- multi-window voting
+- branch score stability
+- confidence calibration
+- repeated-frame evidence
+- uncertain-state report
+- automatic fallback when scores are close
+- clear reason for uncertainty
+
+Example output:
+
+```json
+{
+  "prediction": "UNCERTAIN_BRANCH",
+  "reason": "Branch scores are too close across multiple evidence windows",
+  "left_votes": 4,
+  "right_votes": 5,
+  "branch_gap": 0.018
+}
+```
+
+This should be implemented before using the system in any serious navigation setting.
+
+---
+
+## 7. Improve Unknown Route Handling
+
+Unknown-route learning should become graph-aware.
+
+Needed improvements:
+
+- detect truly unknown routes more reliably
 - prevent duplicate route memory
-- merge similar unknown routes
+- attach unknown routes to nearest known graph node
 - ask user to label new route
-- connect unknown route to nearest known graph node
-- create unknown branch from existing junction
-- maintain memory version history
+- create new branch memory only after confirmation
+- validate memory quality before saving
+- keep memory version history
+- remove noisy or low-confidence memory
 
-Possible future flow:
+Future graph-aware unknown route flow:
 
 ```text
-UNKNOWN_BRANCH
+Unknown branch detected
     ↓
-Save candidate memory
+Save candidate route
     ↓
 Verify with repeated evidence
     ↓
 Ask user for label
     ↓
 Attach to graph
+    ↓
+Re-test next time
 ```
 
 ---
 
-## 8. Improve Memory Management
+## 8. Modularize Notebook Code
 
-As the number of routes grows, memory management becomes important.
+The current implementation is mostly inside notebooks.
 
-Future memory improvements:
+Next engineering step:
 
-- route memory compression
-- centroid-based search
-- approximate nearest neighbor search
-- memory pruning
-- duplicate frame removal
-- low-quality frame filtering
-- route versioning
-- memory confidence score
+```text
+src/
+├── frame_extraction.py
+├── embedding_encoder.py
+├── route_memory.py
+├── dtw_alignment.py
+├── backtracking_graph.py
+├── query_classifier.py
+├── evaluation.py
+└── utils.py
+```
 
-Instead of storing every frame equally, the system can store keyframes.
+This will make the project easier to test, reuse, and maintain.
+
+The notebooks should become experiment runners, not the only place where logic exists.
 
 ---
 
-## 9. Add Object Detection Safety Layer
+## 9. Add a Command-Line Demo
 
-Object detection should be integrated as a separate safety module.
+After modularization, add:
 
-Planned models:
+```text
+run_demo.py
+```
+
+Example command:
+
+```bash
+python run_demo.py --learning sample_data/backtracking_learning_route.mp4 --query sample_data/query_route_1.mp4
+```
+
+Expected output:
+
+```text
+Prediction: RIGHT_BRANCH
+First branch score: ...
+Second branch score: ...
+Branch gap: ...
+Report saved: ...
+```
+
+This will make the repo easier to run without opening notebooks.
+
+---
+
+## 10. Improve Memory Management
+
+Current memory storage is simple.
+
+Future work should include:
+
+- keyframe selection
+- duplicate frame removal
+- low-quality frame filtering
+- memory compression
+- centroid-based retrieval
+- approximate nearest neighbor search
+- route versioning
+- memory confidence scoring
+- memory cleanup tools
+
+As the number of routes grows, simple full-frame storage may become inefficient.
+
+---
+
+## 11. Expand Graph Support
+
+Current graph learning is limited to simple branch structures.
+
+Future graph support should include:
+
+- more than two branches
+- nested junctions
+- route loops
+- merged paths
+- dead ends
+- repeated corridors
+- branch re-entry
+- destination labels
+- graph search
+- graph consistency checks
+
+A future graph may look like:
+
+```text
+Root
+  ↓
+Junction_A
+  ├── Branch_1
+  ├── Branch_2
+  └── Branch_3
+        ↓
+      Junction_B
+        ├── Branch_3A
+        └── Branch_3B
+```
+
+This is a larger research task and should not be treated as already solved.
+
+---
+
+## 12. Add Destination-Aware Wrong-Branch Detection
+
+Current query classification can predict a branch, but destination-aware navigation is not implemented yet.
+
+Future logic:
+
+```text
+selected_destination = "Home"
+expected_branch = "LEFT_BRANCH"
+detected_branch = "RIGHT_BRANCH"
+
+if detected_branch != expected_branch:
+    state = "WRONG_BRANCH"
+```
+
+This should be implemented as a separate decision layer, not mixed directly into embedding similarity code.
+
+---
+
+## 13. Add Object Detection as a Separate Safety Layer
+
+Object detection should be added separately from route memory.
+
+First version should test:
+
+- object detection on extracted frames
+- bounding boxes
+- confidence scores
+- left/center/right object zones
+- simple danger labels
+
+Possible models:
 
 - YOLOv8n TFLite
 - MobileNet-SSD
 - EfficientDet-Lite
 
-Planned outputs:
+This should be tested in a separate notebook before integration.
 
-- object class
-- confidence
-- bounding box
-- object position zone
-- approximate danger level
+Suggested notebook:
 
-The object detection layer should work even if route classification is uncertain or unknown.
+```text
+notebooks/06_object_safety_layer.ipynb
+```
 
 ---
 
-## 10. Add Motion and Tracking
+## 14. Add Motion or Tracking
 
 Object detection does not need to run on every frame.
 
-Future system can use tracking between detections:
+Future tracking options:
 
 - centroid tracking
 - optical flow
-- bounding-box reuse
+- bounding-box tracking
 - object movement estimation
 - approaching-object detection
 
-This can reduce computation and improve real-time performance.
+Tracking can reduce compute cost and improve object warning consistency.
 
 ---
 
-## 11. Build Risk Intelligence Engine
+## 15. Build a Basic Risk Engine
 
-A risk engine should combine multiple signals.
+A future risk engine should combine route and safety signals.
 
 Inputs:
 
-- route confidence
+- branch prediction
 - branch confidence
-- unknown route state
-- uncertain branch state
-- wrong branch state
+- unknown-route state
+- uncertain-route state
+- wrong-branch state
 - object detection output
-- motion/tracking data
-- optional distance sensor
+- object position zone
+- object motion
 
-Outputs:
+Possible outputs:
 
 ```text
 SAFE
 CAUTION
 HIGH_RISK
-CRITICAL / STOP
+CRITICAL_STOP
 ```
 
-The risk engine should prioritize safety over route guidance.
+The risk engine must prioritize safety over route guidance.
 
 ---
 
-## 12. Improve Guidance Engine
+## 16. Add Guidance Engine
 
-The guidance engine should convert system states into simple user-friendly instructions.
+Guidance is not currently implemented.
 
-Planned guidance types:
+Future work should include:
 
-- voice output
-- vibration output
+- text instruction generation
+- TextToSpeech output
+- haptic feedback
+- message cooldown
+- critical alert override
 - wrong-branch warning
-- obstacle warning
-- unknown-route warning
 - uncertain-route warning
-- destination-aware branch instruction
+- obstacle warning
 
-Example:
+Example messages:
 
 ```text
-Take left for Home.
-Wrong branch detected. Please return.
+Route uncertain. Slow down.
+Wrong branch detected. Return to the junction.
 Obstacle ahead. Move carefully.
-Route uncertain. Please slow down.
+Stop. Obstacle ahead.
 ```
 
-Guidance should include anti-spam logic so the system does not repeat messages too frequently.
+This should be tested carefully because bad guidance can be dangerous.
 
 ---
 
-## 13. Android Implementation
+## 17. Prepare for Real-Time Processing
 
-A future version can be implemented in Android Studio.
+The current system is offline and notebook-based.
 
-Recommended Android stack:
+Future real-time work should include:
 
-```text
-Kotlin
-CameraX
-TensorFlow Lite / LiteRT
-Room or SQLite
-TextToSpeech
-Vibration / Haptics
-```
+- live frame capture
+- frame scheduler
+- route recognition at controlled intervals
+- object detection at lower FPS
+- preloaded graph memory
+- no plotting during runtime
+- no disk-based frame extraction
+- optimized vector similarity search
 
-Mobile architecture:
-
-```text
-CameraX ImageAnalysis
-    ↓
-Frame Scheduler
-    ↓
-TFLite Visual Encoder
-    ↓
-Local Route Memory
-    ↓
-Branch Classifier
-    ↓
-Risk Engine
-    ↓
-TextToSpeech / Haptic Output
-```
-
-The Android version should separate learning mode from navigation mode.
-
----
-
-## 14. TFLite / LiteRT Optimization
-
-The current prototype uses TensorFlow/Keras in notebooks.
-
-Future deployment should use:
-
-- TFLite model conversion
-- quantization
-- GPU delegate
-- NNAPI where available
-- fixed input size
-- preloaded route memory
-- optimized FloatArray similarity search
-
-Goal:
-
-```text
-Route / branch recognition: 2-3 FPS
-Object detection: 1-2 FPS
-```
-
----
-
-## 15. Add Real-Time Frame Scheduler
-
-The real-time system should not process every frame heavily.
-
-Suggested schedule:
+Target design:
 
 | Component | Target |
 |---|---|
@@ -384,120 +424,174 @@ Suggested schedule:
 | Risk engine | 2-5 FPS |
 | Guidance | Event-based |
 
-This keeps the system lightweight and practical for mobile devices.
+These targets still need practical testing.
 
 ---
 
-## 16. Add Reproducible Experiments
+## 18. Convert Encoder to TFLite / LiteRT
 
-Future repository updates should include:
+The current notebooks use TensorFlow/Keras.
 
-- clean sample outputs
-- JSON reports
-- notebook execution notes
-- expected input file names
-- reproducible test instructions
-- sample console output
-- versioned experiment folders
+Future deployment should test:
 
-This will make the research easier to verify.
+- TFLite conversion
+- float16 quantization
+- int8 quantization if possible
+- GPU delegate
+- NNAPI delegate
+- mobile latency
+- memory usage
+- accuracy difference after conversion
 
----
-
-## 17. Add Better Documentation
-
-Future documentation improvements:
-
-- architecture diagram
-- notebook walkthrough
-- experiment result summary
-- output file explanation
-- privacy guide
-- Android deployment notes
-- troubleshooting guide
-
-The goal is to make the repo understandable without needing the original chat discussion.
+This should be measured, not assumed.
 
 ---
 
-## 18. Possible Research Questions
+## 19. Android Prototype
 
-Future research can explore:
+Android work should come after the notebook and Python prototype are more stable.
 
-1. Can visual route memory reliably replace GPS for repeated personal routes?
-2. How much route variation can embedding memory tolerate?
-3. How accurate is DTW-based common-path detection?
-4. What is the best visual encoder for lightweight route memory?
-5. How should unknown routes be added without creating duplicate memory?
-6. Can graph memory improve wrong-turn detection?
-7. How well does the system work under lighting and motion variation?
-8. Can mobile hardware support route memory and object detection together?
+Required parts:
 
----
-
-## 19. Planned Development Roadmap
-
-### Version 1
-
-Current prototype:
-
-- route memory baseline
-- unknown route learning
-- shared-prefix branch graph learning
-- DTW synchronization
-- query branch classification
-
-### Version 2
-
-Planned improvements:
-
-- more route testing
-- better transition detection
-- improved unknown route handling
-- cleaner modular Python code
-
-### Version 3
-
-Graph improvements:
-
-- backtracking exploration
-- DFS-style graph learning
-- multi-branch junction support
-- wrong-turn detection
-
-### Version 4
-
-Safety and guidance:
-
-- object detection integration
-- risk engine
-- voice guidance
-- haptic feedback
-
-### Version 5
-
-Mobile deployment:
-
-- Android Studio implementation
-- CameraX live inference
+- CameraX frame analyzer
 - TFLite visual encoder
-- local route memory
-- real-time optimization
+- local memory storage
+- query classification loop
+- object safety layer
+- risk engine
+- TextToSpeech
+- haptic feedback
+- learning mode UI
+- navigation mode UI
+
+This should be built step-by-step, not all at once.
 
 ---
 
-## 20. Final Direction
+## 20. Improve Documentation
 
-The long-term goal of VXN-RAMNet is to move from a notebook-based research prototype toward a lightweight mobile assistive navigation system.
+Documentation should stay honest and synced with implementation.
 
-The current focus is not to claim production readiness, but to build and test each component carefully:
+Needed docs:
+
+- implementation status
+- notebook walkthrough
+- output file explanation
+- sample results explanation
+- privacy guide
+- troubleshooting guide
+- Android deployment plan
+- evaluation results summary
+
+Documentation should clearly separate:
 
 ```text
-visual route memory
-+ shared-path detection
-+ graph-based branch reasoning
-+ uncertainty handling
-+ safety-aware guidance
+implemented
+experimental
+planned
+not implemented
 ```
 
-Each future version should improve reliability, privacy, speed, and real-world usability.
+---
+
+## 21. Add Reproducibility Notes
+
+Future repo updates should include:
+
+- exact notebook execution order
+- input file naming rules
+- expected output files
+- sample console outputs
+- result interpretation
+- known failure cases
+- hardware used for testing
+- approximate runtime
+
+This will make the project easier to verify.
+
+---
+
+## 22. Possible Research Questions
+
+Future research can focus on:
+
+1. Can visual route memory reliably recognize repeated personal routes?
+2. How much viewpoint change can embedding memory tolerate?
+3. How accurate is DTW-based common-path detection?
+4. How accurate is self-similarity-based backtracking detection?
+5. What encoder works best for mobile route memory?
+6. How should unknown routes be added without memory pollution?
+7. Can branch graph memory support wrong-turn detection?
+8. Can route memory and object detection run together on mobile hardware?
+9. How often does the system fail in similar-looking environments?
+10. How should uncertainty be communicated safely to users?
+
+---
+
+## 23. Suggested Roadmap
+
+### Version 0.2
+
+Current upgrade direction:
+
+- backtracking branch graph learning
+- multi-query classification
+- sample output reports
+- updated documentation
+
+### Version 0.3
+
+Next realistic upgrade:
+
+- modular Python code
+- evaluation notebook
+- better uncertainty reports
+- semi-automatic correction mode
+
+### Version 0.4
+
+Graph and decision upgrade:
+
+- graph-aware unknown route handling
+- destination-aware wrong-branch detection
+- better graph memory structure
+
+### Version 0.5
+
+Safety upgrade:
+
+- object detection notebook
+- simple risk engine
+- early guidance rules
+
+### Version 0.6
+
+Mobile preparation:
+
+- TFLite encoder test
+- frame scheduler design
+- Android deployment plan
+
+---
+
+## 24. Final Direction
+
+The future goal is to gradually move from:
+
+```text
+notebook-based visual route experiments
+```
+
+toward:
+
+```text
+tested visual route memory system
+```
+
+and eventually:
+
+```text
+mobile assistive navigation prototype
+```
+
+The next steps should focus on testing, measurement, modularization, and safety. The project should not claim production readiness until those stages are actually implemented and validated.
