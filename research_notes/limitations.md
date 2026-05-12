@@ -2,382 +2,508 @@
 
 This document lists the current limitations of the VXN-RAMNet research prototype.
 
-The goal of this file is to keep the project honest and technically reliable. VXN-RAMNet is currently a notebook-based research prototype, not a production-ready assistive navigation product.
+The goal is to keep the project technically honest. VXN-RAMNet is currently a notebook-based research prototype. It is not a production navigation product, not a certified assistive device, and not a safety-critical system.
 
 ---
 
-## 1. Prototype Status
+## 1. Current Prototype Status
 
-VXN-RAMNet is currently implemented as a research prototype using Jupyter Notebooks.
+VXN-RAMNet is currently implemented through Jupyter Notebook experiments.
 
 Current implementation includes:
 
 - video frame extraction
 - EfficientNetB0-based visual embeddings
-- route memory creation
-- unknown-route learning experiments
-- DTW-based shared-prefix branch graph learning
-- LEFT/RIGHT branch classification
-- JSON and NPZ output generation
+- baseline route memory
+- unknown-route memory update experiment
+- two-video DTW shared-prefix branch graph learning
+- one-video backtracking branch graph learning
+- query route classification
+- JSON and NPZ sample output generation
 
 Current implementation does not yet include:
 
 - production Android application
-- real-time camera pipeline
-- certified navigation safety layer
+- live camera navigation
+- certified safety layer
 - fully integrated object detection
-- large-scale public dataset evaluation
-- field-tested assistive deployment
+- risk engine
+- voice or haptic guidance
+- large-scale dataset evaluation
+- real-world assistive deployment
+
+The current system should be treated as an experimental research base, not a finished product.
 
 ---
 
-## 2. Dataset and Testing Limitations
+## 2. Small Dataset Limitation
 
-The current experiments are based on a small number of personally recorded route videos.
+The current experiments use a small number of personally recorded route videos.
 
-This creates several limitations:
+This creates major limitations:
 
 - limited route diversity
 - limited lighting variation
 - limited camera angle variation
 - limited walking speed variation
-- limited environmental variation
-- limited number of query routes
-- no large benchmark dataset yet
+- limited route complexity
+- limited number of query videos
+- limited unknown-route testing
+- no benchmark dataset
+- no large public validation set
 
-Because of this, current results should be treated as early experimental evidence, not final proof of reliability.
-
----
-
-## 3. Route Structure Assumption
-
-The current shared-prefix branch graph experiment assumes a specific route pattern:
-
-```text
-Common Path
-    ↓
-Junction
-    ├── LEFT Branch
-    └── RIGHT Branch
-```
-
-The system currently expects:
-
-```text
-left_route.mp4  = common path, then LEFT branch
-right_route.mp4 = common path, then RIGHT branch
-query_route.mp4 = route to classify
-```
-
-This works well for testing the idea, but real environments may include:
-
-- multiple branches
-- loops
-- stairs
-- repeated corridors
-- visually similar paths
-- curved paths
-- overlapping routes
-- routes that merge again later
-
-These cases need further testing and architecture refinement.
+Because of this, current results cannot prove real-world reliability. They only show that the idea works under controlled prototype conditions.
 
 ---
 
-## 4. Branch Direction Limitation
+## 3. Notebook-Based Workflow Limitation
 
-In the current prototype, LEFT and RIGHT branch labels are assigned by video order.
+The current workflow is not production-like.
 
-Current rule:
+The notebooks:
 
-```text
-First route after divergence  = LEFT
-Second route after divergence = RIGHT
-```
+- read videos from disk
+- extract frames into folders
+- process batches offline
+- display plots and frame previews
+- save intermediate JSON and NPZ files
+- require manual inspection
 
-The system does not yet infer real physical left or right direction from the camera scene.
+This is useful for research, but it is not the same as a live assistive system.
 
-This means:
+A real system would need:
 
-- physical direction is user-defined
-- branch labels depend on how videos are provided
-- automatic geometric direction understanding is not implemented yet
-
-Future versions may combine visual memory with inertial sensor data, device orientation, optical flow, or visual odometry to estimate direction more automatically.
+- live camera frame processing
+- frame scheduling
+- low-latency inference
+- background processing
+- optimized memory search
+- user-safe error handling
+- no manual notebook inspection
 
 ---
 
-## 5. Visual Embedding Limitations
+## 4. Frozen Encoder Limitation
 
 The current prototype uses EfficientNetB0 as a frozen visual encoder.
 
-This is useful for feature extraction, but it has limitations:
+This is practical for early experiments, but it has limitations:
 
-- it was not trained specifically for route navigation
-- it may confuse visually similar locations
-- lighting changes can reduce similarity accuracy
-- motion blur can reduce embedding quality
-- large viewpoint changes can affect matching
-- seasonal or environmental changes may reduce reliability
-- small but important route differences may be missed
+- it was not trained specifically for visual navigation
+- it may confuse visually similar places
+- it may fail under strong lighting changes
+- it may be affected by motion blur
+- it may not handle large viewpoint changes well
+- it may miss small but important route differences
+- it may not generalize to all indoor/outdoor environments
 
-The encoder is strong enough for prototype testing, but further model evaluation is needed.
+The encoder is useful for prototype testing, but it is not proven as the final best model for this system.
 
 ---
 
-## 6. Similar-Looking Branches
+## 5. Two-Video Shared-Prefix Method Limitation
 
-If the LEFT and RIGHT branches look very similar, the system may produce weak separation.
-
-Example cases:
-
-- two similar corridors
-- similar staircases
-- similar building entrances
-- repeated wall patterns
-- similar road sections
-- low-texture environments
-
-In these cases, branch scores may become close and the system may return:
+The two-video DTW notebook assumes this structure:
 
 ```text
-UNCERTAIN_BRANCH
+left_route.mp4  = root/common path → LEFT branch
+right_route.mp4 = root/common path → RIGHT branch
+query_route.mp4 = route to classify
 ```
 
-This is safer than forcing a wrong prediction, but it shows that more robust evidence collection is needed.
+This works for testing shared-path branch learning, but it has limitations:
+
+- the common path must be recorded twice
+- both videos should start from a similar root point
+- both videos should share a visually recognizable path
+- large camera differences can break alignment
+- the system currently supports a simple two-branch case
+- complex multi-junction environments are not fully handled
+
+This method is useful, but it is not efficient for learning larger environments.
 
 ---
 
-## 7. DTW Synchronization Limitations
+## 6. Backtracking Learning Limitation
 
-Dynamic Time Warping-style alignment helps when two videos have different walking speeds or transition timings.
+The new backtracking notebook improves the workflow by using one learning video:
 
-However, DTW may still fail when:
+```text
+root → junction → first branch → backtrack → junction → second branch
+```
+
+However, it is still experimental.
+
+Limitations:
+
+- the system must detect the first junction and return junction correctly
+- backtracking changes camera direction, which can reduce similarity quality
+- the detected turnaround point may be wrong if the video is shaky
+- long pauses or sudden turns can confuse the split logic
+- visually repetitive corridors may create false junction matches
+- the learning video must follow the expected structure
+- it currently supports a limited one-junction, two-branch scenario
+
+The backtracking notebook is a major upgrade, but it still requires visual verification.
+
+---
+
+## 7. Branch Label Limitation
+
+In the current implementation, branch labels are assigned by recording order or notebook configuration.
+
+For the two-video DTW notebook:
+
+```text
+first route after divergence  = LEFT
+second route after divergence = RIGHT
+```
+
+For the backtracking notebook:
+
+```text
+first branch visited before backtracking  = first branch memory
+second branch visited after backtracking  = second branch memory
+```
+
+The system does not yet infer real physical left/right direction automatically from camera geometry.
+
+This means:
+
+- branch labels depend on how the user records the videos
+- wrong naming can cause wrong interpretation
+- physical left/right is not automatically verified
+- inertial sensor support is not yet used
+
+Future versions may use IMU, compass, optical flow, or visual odometry to improve physical direction understanding.
+
+---
+
+## 8. DTW Alignment Limitation
+
+DTW-style alignment helps when two videos have different walking speeds or transition times.
+
+However, DTW can fail when:
 
 - videos start from different places
-- one route has long pauses
-- one video has large camera shake
-- one video contains missing route sections
-- two paths have repetitive visual patterns
+- one video skips part of the common path
+- one video has long pauses
+- one video has heavy camera shake
 - the common path is too short
-- the visual encoder produces weak features
+- the scene contains repeated similar visual patterns
+- embeddings are weak or noisy
 
-DTW improves synchronization, but it does not fully solve all route alignment problems.
+DTW improves synchronization, but it does not guarantee correct route alignment.
 
 ---
 
-## 8. Common Path Detection Limitation
+## 9. Self-Similarity Limitation
 
-The system detects a common path using embedding similarity.
+The backtracking notebook uses a self-similarity matrix to detect when the user returns to the junction.
 
-This can fail when:
+This can fail if:
 
-- the common path is visually inconsistent
-- lighting changes heavily between recordings
-- camera orientation changes too much
-- the user records the same route from different sides
-- frames are blurry or occluded
-- the common path is too short
+- the junction looks similar to other places
+- the route has repeated corridors
+- the camera angle is very different on return
+- lighting changes during recording
+- the user turns too quickly
+- the return path is visually unclear
+- there is no clear pause or visual landmark at the junction
 
-Because of this, transition detection should be visually verified using the displayed context frames.
-
----
-
-## 9. Transition Detection Limitation
-
-The notebook displays:
-
-```text
-3 frames before transition
-1 transition frame
-3 frames after transition
-```
-
-This is useful for human verification.
-
-However, the detected transition is still based on similarity thresholds and smoothed similarity drops.
-
-It may be inaccurate if:
-
-- similarity drops too early
-- similarity drops too late
-- the junction is visually gradual
-- the branch starts before the visual scene changes
-- the camera turns slowly
-- multiple environmental changes happen near the same time
-
-The current transition detection is experimental and should be checked visually.
+Self-similarity is useful, but it is not yet a complete visual localization solution.
 
 ---
 
 ## 10. Query Classification Limitation
 
-The query route classification depends on:
+Query classification depends on:
 
-- query video quality
-- common-path match
-- branch evidence quality
-- LEFT/RIGHT branch score gap
-- embedding separation
+- video quality
+- branch visibility
+- selected evidence window
+- camera direction
+- lighting
+- frame stability
+- visual difference between branches
+- strength of saved branch memory
 
-The system may misclassify if:
+The classifier can misclassify if:
 
-- the query video starts late
-- the query video misses the common path
-- the query branch is recorded from a different angle
-- the route is partially blocked
-- the query route contains unusual motion
-- the query branch looks similar to the other branch
+- the query video starts too late
+- the query video does not contain enough branch frames
+- the branch looks similar to another branch
+- the camera angle is different from learning
+- the path is partially blocked
+- motion blur affects important frames
+- the selected branch evidence window is not representative
 
-The strong branch override helps when branch evidence is clear, but it can also be risky if branch memory is not diverse enough.
-
----
-
-## 11. Unknown Route Learning Limitation
-
-Unknown-route learning is currently experimental.
-
-The system can save unknown route frames and generate new memory, but several issues remain:
-
-- deciding when a route is truly unknown
-- avoiding duplicate memory for the same route
-- merging similar routes
-- naming new routes
-- connecting unknown routes into an existing graph
-- verifying new route quality
-- preventing noisy memory growth
-
-Future versions need better memory management and graph update logic.
+The latest backtracking notebook improves branch evidence selection, but query classification still needs more testing.
 
 ---
 
-## 12. Object Detection Integration Limitation
+## 11. Uncertainty Handling Limitation
 
-Object detection is described as a planned safety layer.
+Uncertainty handling currently exists mainly as threshold-based logic.
 
-It is not yet fully integrated into the current VXN-RAMNet branch graph pipeline.
+The current system can return uncertain states, but it does not yet have a complete robust uncertainty engine.
 
-Current route-memory experiments focus mainly on:
+Missing parts include:
 
-- visual route embeddings
-- route matching
-- DTW alignment
-- branch classification
+- multi-window vote stability
+- repeated evidence collection over time
+- temporal confidence smoothing
+- confidence calibration
+- false-positive control
+- explainable uncertainty reports
+- automatic request for more frames in real time
 
-Future object detection integration will need:
-
-- lightweight object detector
-- mobile-compatible inference
-- object tracking
-- risk scoring
-- warning priority logic
-- anti-spam voice output
+The current uncertainty logic is useful for experiments, but it is not strong enough for safety-critical navigation.
 
 ---
 
-## 13. Real-Time Limitation
+## 12. Unknown Route Learning Limitation
 
-The current implementation is notebook-based and not optimized for real-time deployment.
+Unknown-route learning exists as an experiment, but it is not fully integrated into graph memory.
 
-The target is:
+Current limitations:
+
+- unknown routes are not automatically attached to the correct junction
+- duplicate unknown routes may be created
+- noisy route memories may grow over time
+- route naming is not automated
+- user confirmation is not implemented
+- unknown route quality is not validated
+- graph consistency is not enforced
+
+Full unknown-route graph insertion is still future work.
+
+---
+
+## 13. Graph Memory Limitation
+
+The current graph memory is limited.
+
+Implemented graph structures are mainly:
 
 ```text
-Route / branch recognition: 2-3 FPS
-Object detection: 1-2 FPS
-Camera preview: 10-15 FPS
+common path → junction → LEFT/RIGHT branch
 ```
 
-However, the notebook workflow includes:
+and:
 
-- plotting
-- displaying frames
-- reading images from disk
-- running full batch inference
-- saving intermediate files
+```text
+root → junction → first branch → backtrack → junction → second branch
+```
 
-These are useful for research but not suitable for real-time mobile deployment.
+The system does not yet fully support:
 
-A production-style version would require:
+- many junctions
+- loops
+- route merging
+- recursive graph expansion
+- multiple destinations
+- route planning
+- shortest path selection
+- graph repair
+- graph versioning
+- automatic graph consistency checks
 
-- CameraX or live camera pipeline
-- TFLite / LiteRT model conversion
-- optimized memory search
-- preloaded embeddings
-- background processing
-- careful frame scheduling
+Current graph memory is a prototype, not a complete navigation graph engine.
 
 ---
 
-## 14. Mobile Deployment Limitation
+## 14. Object Detection Limitation
 
-The architecture is mobile-implementable, but the current repo version is not an Android app.
+Object detection is planned as a separate safety layer, but it is not fully implemented in the current repo.
+
+The current notebooks focus mainly on:
+
+- visual embeddings
+- route memory
+- branch graph learning
+- query classification
+
+Object detection still needs:
+
+- lightweight detector integration
+- detection zones
+- tracking
+- risk scoring
+- false warning control
+- real-time performance testing
+- voice/haptic warning connection
+
+Until this is implemented, the system cannot provide real obstacle safety support.
+
+---
+
+## 15. Risk Engine Limitation
+
+The risk engine is not implemented yet.
+
+The current system does not yet combine:
+
+- branch confidence
+- unknown-route state
+- uncertain-route state
+- object detection
+- motion tracking
+- wrong-branch state
+- distance information
+- user guidance priority
+
+Risk levels such as:
+
+```text
+SAFE
+CAUTION
+HIGH_RISK
+CRITICAL / STOP
+```
+
+are planned concepts, not complete working runtime logic.
+
+---
+
+## 16. Guidance Limitation
+
+Voice or haptic guidance is not implemented in the current repo.
+
+There is no working system yet for:
+
+- TextToSpeech output
+- haptic feedback
+- cooldown between messages
+- critical alert priority
+- wrong-branch warning
+- live user instruction
+- accessibility testing
+
+Current guidance examples are design plans, not deployed features.
+
+---
+
+## 17. Real-Time Limitation
+
+The current system is not optimized for real-time deployment.
+
+Current notebooks include:
+
+- batch inference
+- frame extraction to disk
+- plotting
+- visualization
+- JSON/NPZ saving
+- manual verification
+
+A real-time system would need:
+
+- encoder loaded once
+- graph memory loaded once
+- live frame scheduler
+- fast similarity search
+- no runtime plotting
+- no repeated disk reads
+- mobile inference optimization
+- strict latency measurement
+
+The target of 2-3 FPS route recognition is a future engineering goal, not a proven mobile result yet.
+
+---
+
+## 18. Android Deployment Limitation
+
+The architecture may be possible to deploy on Android, but no Android app is currently implemented.
 
 Android implementation would require:
 
-- Kotlin or Java app structure
-- CameraX frame analysis
-- TensorFlow Lite model
+- CameraX pipeline
+- TensorFlow Lite or LiteRT encoder
 - local memory storage
 - optimized embedding comparison
 - background threading
+- battery testing
+- thermal testing
 - TextToSpeech
-- haptic feedback
-- battery and thermal testing
+- haptics
+- UI/UX for learning and navigation modes
 
-The current notebooks are a research base for this future work.
+The current repo is a research base for Android work, not an Android application.
 
 ---
 
-## 15. Privacy Limitation
+## 19. Privacy Limitation
 
-Route videos may contain sensitive information such as:
+Route videos can contain sensitive information.
+
+Possible privacy risks:
 
 - faces
-- houses
-- vehicle numbers
-- road signs
+- homes
+- number plates
 - college buildings
-- personal movement patterns
+- street signs
+- personal routes
+- repeated movement patterns
 - location context
 
-For this reason, raw personal videos and extracted frame folders should not be uploaded publicly unless anonymized.
+For this reason:
 
-The repository should include only safe sample data or placeholder instructions.
+- raw videos should not be uploaded publicly unless anonymized
+- extracted frames should not be committed
+- generated frame folders should remain local
+- public sample data should be privacy-reviewed
+
+Privacy is a serious limitation for this kind of project.
 
 ---
 
-## 16. Safety Limitation
+## 20. Safety Limitation
 
-VXN-RAMNet is not a certified navigation, medical, or mobility-assistance product.
+VXN-RAMNet is not a certified navigation, medical, mobility, or safety product.
 
-It should not be used as the only source of navigation or safety guidance.
+It should not be used as the only source of navigation guidance.
 
-Current outputs are experimental and may be wrong.
+Current outputs can be wrong.
 
-The system requires:
+Before real assistive use, the system would need:
 
-- more testing
+- larger testing
+- controlled evaluation
+- field trials
+- accessibility testing
+- failure-mode handling
 - safety validation
-- failure handling
-- user studies
-- accessibility review
-- real-world evaluation
-
-before any assistive deployment.
+- human review
+- legal and ethical review
 
 ---
 
-## 17. Summary
+## 21. Summary
 
-The current VXN-RAMNet prototype demonstrates a promising research direction:
+The current VXN-RAMNet prototype demonstrates an experimental direction:
 
 ```text
 visual route memory
 + DTW synchronization
-+ branch graph learning
-+ uncertainty-aware classification
++ backtracking graph learning
++ branch classification
 ```
 
-However, the system is still early-stage and needs more validation before it can be considered reliable for real-world assistive use.
+However, it remains early-stage.
 
-The limitations in this document should be treated as active research challenges, not final failures.
+The main limitations are:
+
+```text
+small dataset
+not real-time
+not mobile-ready
+not safety-certified
+limited graph complexity
+experimental backtracking detection
+no integrated object detection
+no risk/guidance engine
+```
+
+These limitations should be treated as active research and engineering problems, not solved features.
