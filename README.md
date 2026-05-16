@@ -1,231 +1,255 @@
-# VXN-RAMNet
+<h1 align="center">VXN-RAMNet</h1>
 
-**VisionX Routine Adaptive Memory Network**
+<p align="center">
+  <strong>VisionX Routine Adaptive Memory Network</strong><br>
+  GPS-free visual route memory, backtracking branch-graph learning, and assistive navigation research.
+</p>
 
-A notebook-based research prototype for GPS-free visual route memory, shared-path learning, backtracking-based branch graph learning, and assistive navigation intelligence.
+<p align="center">
+  <img alt="Status" src="https://img.shields.io/badge/status-research%20prototype-blue">
+  <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-3776AB">
+  <img alt="Core" src="https://img.shields.io/badge/core-visual%20route%20memory-purple">
+  <img alt="Pipeline" src="https://img.shields.io/badge/pipeline-src%20%2B%20scripts-success">
+  <img alt="Encoder" src="https://img.shields.io/badge/encoder-EfficientNetB0-lightgrey">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
+</p>
 
-![Status](https://img.shields.io/badge/status-research%20prototype-blue)
-![Python](https://img.shields.io/badge/python-3.10%2B-green)
-![Workflow](https://img.shields.io/badge/workflow-jupyter%20notebook-orange)
-![Domain](https://img.shields.io/badge/domain-assistive%20AI-purple)
-![Model](https://img.shields.io/badge/encoder-EfficientNetB0-lightgrey)
+<p align="center">
+  <a href="#overview">Overview</a> ·
+  <a href="#what-is-implemented">Implemented</a> ·
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#repository-structure">Structure</a> ·
+  <a href="#current-limitations">Limitations</a>
+</p>
 
 ---
 
 ## Overview
 
-VXN-RAMNet is an experimental visual navigation project that explores how repeated routes can be learned using video input instead of relying on GPS as the main navigation brain.
+**VXN-RAMNet** is a research prototype that explores whether repeated routes can be learned through **visual memory** instead of relying on GPS as the main navigation signal.
 
-The project currently focuses on:
+The system processes route videos, extracts frames, converts those frames into visual embeddings using a frozen encoder, stores route/branch memory, and classifies future query routes using similarity-based evidence.
 
-- extracting frames from route videos
-- generating visual embeddings using a frozen encoder
-- comparing route memories using cosine similarity
-- detecting shared route sections
-- identifying where routes diverge
-- building simple branch graph memory
-- classifying query videos as branch routes
-- handling uncertain and unknown route cases experimentally
-- testing a one-video backtracking learning upgrade
-
-This repository contains Jupyter Notebook experiments, documentation, sample reports, and console outputs used while developing the VXN-RAMNet prototype.
-
----
-
-## Current Prototype Scope
-
-This project is currently a **research prototype**, not a production navigation system.
-
-It is not yet:
-
-- a production Android application
-- a certified assistive navigation system
-- a medical or mobility safety device
-- a real-time live camera product
-
-The current implementation is based on offline video experiments in Jupyter Notebooks.
-
----
-
-## Why This Project Exists
-
-Most assistive vision systems mainly focus on object detection.
-
-Example:
+The main research direction is:
 
 ```text
-Camera Frame → Object Detector → "Chair detected"
+Teach a route visually
+        ↓
+Store route embeddings as memory
+        ↓
+Compare future query routes against memory
+        ↓
+Detect common path, junction, branch, and route identity
 ```
 
-That is useful, but it does not answer navigation questions such as:
-
-- Is the user on the correct route?
-- Where does the route split?
-- Which branch leads to the selected destination?
-- Is the current path unknown?
-- Can the system remember repeated routes visually?
-
-VXN-RAMNet experiments with route memory and graph-based route reasoning instead of only detecting objects.
+> [!IMPORTANT]
+> This repository is a **research prototype**, not a certified navigation product, medical device, or mobility safety system.
 
 ---
 
 ## Core Idea
 
-The system uses a frozen visual encoder to convert route frames into embeddings.
-
-The model is not retrained for each route. Instead, route memory grows by storing embeddings.
+Most assistive vision systems mainly answer object-level questions:
 
 ```text
-Video Frames
-    ↓
-Frozen Visual Encoder
-    ↓
-Visual Embeddings
-    ↓
-Route / Branch Memory
-    ↓
-Similarity-Based Decision
+Camera frame → Object detector → "Chair detected"
 ```
 
-Prototype encoder:
+VXN-RAMNet focuses on route-level questions:
 
 ```text
-EfficientNetB0
+Is this a known route?
+Where does the route split?
+Which branch is the user taking?
+Did the user return to the same junction?
+Can a route be remembered without retraining the model?
 ```
 
-No route-specific model retraining is used in the current notebooks.
+The core design principle is:
+
+```text
+The visual encoder stays fixed.
+The route memory grows.
+```
+
+This means VXN-RAMNet does **not** retrain a model for every route. It stores embeddings and compares new route evidence against those memories.
 
 ---
 
-## Implemented Experiments
+## Current Research Scope
 
-The repository currently contains four main notebooks.
+VXN-RAMNet currently supports offline video-based experiments and a modular Python pipeline.
 
-| Notebook | Purpose |
-|---|---|
-| `01_route_memory_baseline.ipynb` | Baseline route-memory experiment using visual embeddings and similarity scoring |
-| `02_unknown_route_auto_learning.ipynb` | Experimental unknown-route memory update without retraining |
-| `03_shared_prefix_branch_graph_dtw.ipynb` | Two-video shared-prefix branch graph learning using DTW synchronization |
-| `04_backtracking_branch_graph_learning.ipynb` | One-video backtracking-based branch graph learning and multi-query classification |
+It currently includes:
 
----
+- frame extraction from route videos
+- EfficientNetB0 frozen visual embedding generation
+- cosine-similarity based route/branch matching
+- baseline visual route memory
+- unknown-route memory update experiment
+- two-video DTW shared-prefix branch graph learning
+- stable one-video backtracking branch graph learning
+- query branch classification
+- JSON, CSV, NPZ, and Markdown result reports
 
-## Experiment 1: Route Memory Baseline
+It does **not** currently provide:
 
-This notebook tests basic visual route memory.
-
-```text
-Route Videos
-    ↓
-Frame Extraction
-    ↓
-EfficientNetB0 Embeddings
-    ↓
-Route Memory
-    ↓
-Query Route Classification
-```
-
-It tests whether a query route can be matched against stored route memory using embedding similarity.
+- certified real-world navigation safety
+- Android production deployment
+- live camera guidance
+- object detection safety layer
+- validated large-scale user testing
+- medical or mobility-aid certification
 
 ---
 
-## Experiment 2: Unknown Route Auto-Learning
+## What Is Implemented
 
-This notebook tests an early version of unknown-route learning.
-
-```text
-Known Route Memory
-    ↓
-Query Route
-    ↓
-Unknown Route Detection
-    ↓
-Save Unknown Route Embeddings
-    ↓
-Update Memory
-    ↓
-Test Again
-```
-
-This is still experimental and not yet fully integrated into the graph-learning system.
+| Area | Status | Current Form |
+|---|---:|---|
+| Visual frame extraction | ✅ Implemented | `src/` + experiments |
+| EfficientNetB0 frozen encoder | ✅ Implemented | `src/` + experiments |
+| Baseline route-memory classification | ✅ Implemented | experiment notebook |
+| Unknown-route memory update | 🧪 Experimental | experiment notebook |
+| Two-video DTW branch graph | ✅ Stable baseline | experiment notebook |
+| One-video backtracking branch graph | ✅ Stable advanced | `src/` + experiment notebook |
+| Query branch classification | ✅ Implemented | `src/` + experiment notebook |
+| Report generation | ✅ Implemented | `src/` pipeline |
+| Modular CLI pipeline | ✅ Implemented | `scripts/` |
+| Upload-based local UI | ✅ Implemented if Streamlit deps are installed | `scripts/` |
+| Multi-junction graph memory | 🚧 Planned | not implemented |
+| Graph-aware unknown branch insertion | 🚧 Planned | not implemented |
+| Object detection safety layer | 🚧 Planned | not implemented |
+| Android/TFLite runtime | 🚧 Planned | not implemented |
 
 ---
 
-## Experiment 3: Shared-Prefix Branch Graph Learning with DTW
+## Main Experiments
 
-This notebook uses two route videos that start from a common path and later split into different branches.
+The notebook experiments are stored in the `experiments/` folder.
 
-Input:
+| Experiment | Status | Purpose |
+|---|---:|---|
+| `01_route_memory_baseline.ipynb` | ✅ Stable | Baseline visual route-memory recognition |
+| `02_unknown_route_auto_learning.ipynb` | 🧪 Experimental | Unknown-route detection and memory update |
+| `03_shared_prefix_branch_graph_dtw.ipynb` | ✅ Stable baseline | Two-video shared-prefix branch graph learning using DTW |
+| `04_backtracking_branch_graph_learning.ipynb` | ✅ Stable advanced | One-video backtracking-based branch graph learning and query classification |
 
-```text
-left_route.mp4
-right_route.mp4
-query_route.mp4
-```
+> [!NOTE]
+> `04_backtracking_branch_graph_learning.ipynb` is the main advanced method in the current repository. `03_shared_prefix_branch_graph_dtw.ipynb` remains useful as the stable two-video baseline.
 
-Example:
+---
 
-```text
-left_route.mp4
-Root → Common Path → Junction → LEFT Branch
+## Production SRC Pipeline
 
-right_route.mp4
-Root → Common Path → Junction → RIGHT Branch
-```
-
-The notebook performs:
-
-- frame extraction
-- EfficientNetB0 embedding generation
-- similarity matrix creation
-- DTW-style synchronization
-- common path detection
-- divergence detection
-- LEFT/RIGHT branch memory creation
-- query route classification
-
-Learned structure:
+The notebook 4 logic has been modularized into `src/` and can now be run without opening Jupyter.
 
 ```text
-Common Path
-    ↓
-Junction
-    ├── LEFT Branch
-    └── RIGHT Branch
-```
-
-DTW is used because two videos may reach the same junction at different times.
-
-Instead of assuming:
-
-```text
-left_frame_18 ↔ right_frame_18
-```
-
-the system aligns visually similar sections:
-
-```text
-left_frame_i ↔ right_frame_j
+Learning video + query videos
+        ↓
+Frame extraction
+        ↓
+Original + flipped embedding generation
+        ↓
+Flip-aware self-similarity
+        ↓
+Junction revisit detection
+        ↓
+Backtracking graph construction
+        ↓
+Multi-window query classification
+        ↓
+Result reports
 ```
 
 ---
 
-## Experiment 4: Backtracking-Based Branch Graph Learning
+## Quick Start
 
-This is the latest upgrade.
+### 1. Clone the repository
 
-Instead of recording the common path twice, the user records one learning video.
+```bash
+git clone https://github.com/AjaySoni-Dev/VXN-RAMNet.git
+cd VXN-RAMNet
+```
 
-Input:
+### 2. Create a virtual environment
+
+Windows PowerShell:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\activate
+```
+
+macOS/Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Install pipeline dependencies
+
+```bash
+pip install -r configs/requirements-src.txt
+```
+
+### 4. Run the backtracking pipeline
+
+Windows PowerShell:
+
+```powershell
+python scripts/run_backtracking_pipeline.py `
+  --learning-video "path\to\backtracking_learning_route.mp4" `
+  --query-videos "path\to\query_route_1.mp4" "path\to\query_route_2.mp4"
+```
+
+macOS/Linux:
+
+```bash
+python scripts/run_backtracking_pipeline.py \
+  --learning-video "path/to/backtracking_learning_route.mp4" \
+  --query-videos "path/to/query_route_1.mp4" "path/to/query_route_2.mp4"
+```
+
+### 5. Open the generated report
+
+```text
+vxn_backtracking_graph_outputs/vxn_backtracking_report.md
+```
+
+---
+
+## Optional Upload App
+
+For users who prefer uploading videos through a local browser UI:
+
+```bash
+pip install -r configs/requirements-ui.txt
+streamlit run scripts/backtracking_upload_app.py
+```
+
+Then upload:
+
+```text
+1 learning video
+1 or more query videos
+```
+
+The app runs the same backtracking pipeline and writes the same output reports.
+
+---
+
+## Expected Input for the Stable Backtracking Pipeline
+
+### Learning video
 
 ```text
 backtracking_learning_route.mp4
-query_route_1.mp4
-query_route_2.mp4
 ```
 
-Learning video structure:
+Recommended structure:
 
 ```text
 Root
@@ -239,74 +263,45 @@ Backtrack to Junction
 Second Branch
 ```
 
-The notebook performs:
-
-- frame extraction from one learning video
-- EfficientNetB0 embedding generation
-- flip-aware embedding comparison
-- self-similarity matrix creation
-- junction revisit detection
-- backtracking segment detection
-- graph memory creation
-- multi-query branch classification
-- stronger branch-evidence window selection
-
-Learned structure:
+### Query videos
 
 ```text
-Root
-  ↓
-Common Path
-  ↓
-Junction
-  ├── First Branch
-  └── Second Branch
+query_route_1.mp4
+query_route_2.mp4
+...
 ```
 
-This upgrade fixes a key limitation of the earlier two-video method: the user does not need to re-record the same root/common path for every branch.
+Each query video should show a route that belongs to one of the learned branches.
 
 ---
 
-## Current Workflow
+## Output Files
 
-The current repo workflow is notebook-based.
-
-```text
-User records route videos
-        ↓
-User places videos locally
-        ↓
-User runs notebook cells
-        ↓
-System extracts frames
-        ↓
-System creates embeddings
-        ↓
-System builds memory / graph memory
-        ↓
-System classifies query videos
-        ↓
-System saves JSON and NPZ outputs
-```
-
-Raw personal videos are not included in the public repository by default.
-
----
-
-## Main Outputs
-
-The notebooks generate outputs such as:
+The pipeline generates:
 
 ```text
-frame extraction reports
-graph metadata
-query classification reports
-final summary reports
-sample console outputs
-optional graph memory NPZ files
+vxn_backtracking_graph_outputs/
+├── frame_extraction_report.json
+├── vxn_backtracking_embeddings.npz
+├── vxn_backtracking_graph_memory.npz
+├── vxn_backtracking_graph_metadata.json
+├── query_reports/
+├── vxn_backtracking_all_query_summary.json
+├── vxn_backtracking_final_summary.json
+├── vxn_backtracking_query_results.csv
+└── vxn_backtracking_report.md
 ```
 
-Generated extracted frame folders are not included because they may contain private visual information.
+| File | Purpose |
+|---|---|
+| `frame_extraction_report.json` | Records frame counts and extracted video metadata |
+| `vxn_backtracking_embeddings.npz` | Stores original/flipped embeddings |
+| `vxn_backtracking_graph_memory.npz` | Stores learned graph component embeddings |
+| `vxn_backtracking_graph_metadata.json` | Stores detected junction, return, and segment information |
+| `query_reports/` | Per-query classification reports |
+| `vxn_backtracking_all_query_summary.json` | Combined query prediction summary |
+| `vxn_backtracking_query_results.csv` | Table-friendly query result file |
+| `vxn_backtracking_report.md` | Human-readable final report |
 
 ---
 
@@ -314,115 +309,70 @@ Generated extracted frame folders are not included because they may contain priv
 
 ```text
 VXN-RAMNet/
-│
-├── README.md
-├── LICENSE
-├── requirements.txt
+├── configs/          # Configuration files and pipeline-specific requirements
+├── demo_outputs/     # Clean console output examples from experiments
+├── docs/             # Architecture, build manual, and system flow documentation
+├── experiments/      # Jupyter notebooks used for research experiments
+├── research_notes/   # Limitations, future work, and research notes
+├── sample_data/      # Sample-data instructions; raw private videos are not committed
+├── sample_results/   # Curated sample outputs and reports
+├── scripts/          # User-facing runnable scripts and optional upload app
+├── src/              # Modular Python source code for the reusable pipeline
 ├── .gitignore
-│
-├── notebooks/
-│   ├── README.md
-│   ├── 01_route_memory_baseline.ipynb
-│   ├── 02_unknown_route_auto_learning.ipynb
-│   ├── 03_shared_prefix_branch_graph_dtw.ipynb
-│   └── 04_backtracking_branch_graph_learning.ipynb
-│
-├── docs/
-│   ├── architecture.md
-│   ├── build_manual.md
-│   ├── system_flow_full.md
-│   ├── system_flow_short.md
-│   └── implementation_status.md
-│
-├── sample_data/
-│   └── README.md
-│
-├── sample_results/
-│   ├── reports/
-│   │   ├── frame_extraction_report_sample.json
-│   │   ├── vxn_branch_graph_metadata_dtw_sample.json
-│   │   ├── vxn_branch_query_classification_report_dtw_sample.json
-│   │   ├── backtracking_frame_extraction_report_sample.json
-│   │   ├── backtracking_graph_metadata_sample.json
-│   │   ├── backtracking_query_route_1_report_sample.json
-│   │   ├── backtracking_query_route_2_report_sample.json
-│   │   ├── backtracking_all_query_summary_sample.json
-│   │   └── backtracking_final_summary_sample.json
-│   │
-│   └── memory/
-│       ├── vxn_branch_graph_memory_dtw_sample.npz
-│       └── vxn_backtracking_graph_memory_sample.npz
-│
-├── demo_outputs/
-│   ├── sample_console_output.txt
-│   └── backtracking_sample_console_output.txt
-│
-└── research_notes/
-    ├── limitations.md
-    └── future_work.md
+├── LICENSE
+├── README.md
+└── requirements.txt
 ```
-
-The exact structure may change as the prototype improves.
 
 ---
 
-## Sample Data
+## What Each New Production Folder Does
 
-The `sample_data/` folder is reserved for optional anonymized sample videos.
+| Folder | Role |
+|---|---|
+| `src/` | Reusable Python engine converted from the stable backtracking notebook |
+| `scripts/` | Entry points users run from terminal or local upload UI |
+| `configs/` | Pipeline config and dependency files |
 
-Raw personal route videos are not included by default because route videos may contain:
-
-- faces
-- private locations
-- vehicle numbers
-- buildings
-- personal movement patterns
-- sensitive route information
-
-The notebooks can be run with local videos placed in either:
+<details>
+<summary><strong>src/ module responsibilities</strong></summary>
 
 ```text
-sample_data/
+src/vxn_ramnet/config.py
+Stores pipeline settings and thresholds.
+
+src/vxn_ramnet/frame_extraction.py
+Extracts frames from learning and query videos.
+
+src/vxn_ramnet/encoder.py
+Loads EfficientNetB0 and generates original/flipped embeddings.
+
+src/vxn_ramnet/similarity.py
+Contains normalization, cosine similarity, top-k, and self-similarity helpers.
+
+src/vxn_ramnet/route_memory.py
+Stores and saves graph memory components.
+
+src/vxn_ramnet/backtracking_graph.py
+Builds the backtracking graph using flip-aware self-similarity.
+
+src/vxn_ramnet/query_classifier.py
+Classifies query videos using branch evidence windows.
+
+src/vxn_ramnet/reports.py
+Writes JSON, CSV, and Markdown reports.
+
+src/vxn_ramnet/pipeline.py
+Runs the complete end-to-end flow.
+
+src/vxn_ramnet/cli.py
+Connects the pipeline to terminal commands.
+
+src/vxn_ramnet/utils.py
+Common filesystem and JSON helpers.
 ```
 
-or:
-
-```text
-videos/
-```
-
-depending on notebook configuration.
-
----
-
-## Sample Results
-
-The `sample_results/` folder contains curated outputs generated from notebooks.
-
-It may include:
-
-- frame extraction reports
-- graph metadata
-- query classification reports
-- final experiment summaries
-- optional small graph memory files
-
-Generated extracted frame folders and intermediate embedding files are not committed.
-
----
-
-## Demo Outputs
-
-The `demo_outputs/` folder contains clean console output examples.
-
-Current examples:
-
-```text
-sample_console_output.txt
-backtracking_sample_console_output.txt
-```
-
-These files show the important notebook output without requiring users to run the full notebooks first.
+</details>
 
 ---
 
@@ -430,181 +380,130 @@ These files show the important notebook output without requiring users to run th
 
 | Tool | Purpose |
 |---|---|
-| Python | Main development language |
-| Jupyter Notebook | Experimentation |
-| TensorFlow / Keras | Visual encoder |
-| EfficientNetB0 | Frozen frame embedding model |
+| Python | Main programming language |
+| Jupyter Notebook | Research experiments |
+| TensorFlow/Keras | EfficientNetB0 encoder |
 | OpenCV | Video processing and frame extraction |
-| NumPy | Embedding and similarity operations |
-| Pandas | Result tables |
-| Matplotlib | Visualization |
+| NumPy | Embeddings, similarity, matrix operations |
+| Pandas | CSV and tabular reports |
 | Pillow | Image loading and preprocessing |
+| Matplotlib | Experiment visualization |
+| Streamlit | Optional local upload UI |
 
 ---
 
-## Installation
+## Research Notes
 
-Clone the repository:
-
-```bash
-git clone https://github.com/<your-username>/VXN-RAMNet.git
-cd VXN-RAMNet
-```
-
-Install requirements:
-
-```bash
-pip install -r requirements.txt
-```
-
-Start Jupyter:
-
-```bash
-jupyter notebook
-```
-
-Then open the notebooks inside the `notebooks/` folder.
-
----
-
-## Requirements
-
-Main dependencies:
+The current research contribution is strongest around:
 
 ```text
-opencv-python
-numpy
-pandas
-pillow
-matplotlib
-tensorflow
-scikit-learn
-jupyter
-ipykernel
-tqdm
+Single-demonstration backtracking branch graph learning
 ```
 
-See `requirements.txt` for the full dependency list.
-
----
-
-## How to Run the Main Experiments
-
-### Run the two-video DTW experiment
-
-Use notebook:
+Instead of recording:
 
 ```text
-notebooks/03_shared_prefix_branch_graph_dtw.ipynb
+common path → left branch
+common path → right branch
 ```
 
-Expected local videos:
+the user can record:
 
 ```text
-left_route.mp4
-right_route.mp4
-query_route.mp4
+common path → first branch → backtrack → second branch
 ```
 
-### Run the backtracking experiment
-
-Use notebook:
-
-```text
-notebooks/04_backtracking_branch_graph_learning.ipynb
-```
-
-Expected local videos:
-
-```text
-backtracking_learning_route.mp4
-query_route_1.mp4
-query_route_2.mp4
-```
-
-Recommended learning video structure:
-
-```text
-Root → Junction → First Branch → Backtrack → Junction → Second Branch
-```
-
----
-
-## Implementation Status
-
-| Component | Status | Current Form |
-|---|---|---|
-| Video frame extraction | Implemented | Notebook |
-| EfficientNetB0 frozen embedding encoder | Implemented | Notebook |
-| Baseline route memory | Implemented | Notebook |
-| Unknown-route memory update | Experimental | Notebook |
-| Two-video DTW shared-prefix branch graph | Implemented | Notebook |
-| Query LEFT/RIGHT branch classification | Implemented | Notebook |
-| One-video backtracking branch graph learning | Experimental | Notebook |
-| Junction revisit detection | Experimental | Self-similarity |
-| Multi-query branch classification | Experimental | Notebook |
-| Uncertainty handling | Partial | Threshold/evidence logic |
-| Unknown branch graph insertion | Planned | Not implemented |
-| Object detection safety layer | Planned | Not implemented |
-| Risk engine | Planned | Not implemented |
-| Voice or haptic guidance | Planned | Not implemented |
-| Android app | Future work | Not implemented |
-| Real-time 2-3 FPS runtime | Future work | Not implemented |
+This reduces repeated teaching effort and makes the route-learning process more natural.
 
 ---
 
 ## Current Limitations
 
-- The project is currently notebook-based.
-- It has been tested on a limited number of route videos.
-- Results depend on video quality, lighting, blur, and camera angle.
-- Similar-looking branches may confuse the embedding matcher.
-- Backtracking detection is experimental and should be visually verified.
-- Object detection is not yet integrated.
-- Live camera navigation is not implemented.
-- Android deployment is future work.
-- This is not a certified navigation or safety system.
+This project is not overclaimed. Current limitations include:
 
-See `research_notes/limitations.md` for more details.
+- the dataset is still small
+- the pipeline needs broader evaluation across more routes
+- the system is currently offline video-based
+- similar-looking corridors or branches can confuse similarity matching
+- physical left/right direction is not inferred geometrically
+- object detection safety is not integrated yet
+- unknown-route insertion is not fully graph-aware yet
+- live camera navigation is not implemented
+- Android deployment is future work
+- this is not certified as a safety-critical assistive navigation system
+
+> [!WARNING]
+> Do not use this repository as the only source of navigation or safety guidance. It is a research prototype.
 
 ---
 
-## Future Work
+## Research Roadmap
+
+Immediate next step:
+
+```text
+VXN-RAMNet v0.2
+Stable Backtracking Branch Graph Evaluation
+```
+
+Minimum evaluation target:
+
+```text
+5 backtracking route graphs
+20 query videos
+manual labels for junction and branch ground truth
+accuracy table
+failure analysis
+sample reports
+```
 
 Planned improvements:
 
-- move reusable notebook logic into `src/` modules
-- add a command-line demo script
+- add `05_backtracking_evaluation_summary.ipynb`
+- evaluate notebook 4 across multiple route graphs
+- add graph-aware unknown branch insertion
+- add multi-junction graph support
+- add destination-aware wrong-branch detection
 - improve uncertainty handling
-- improve unknown-route graph insertion
-- add more evaluation videos
-- add object detection as a separate safety layer
-- build a simple risk engine
-- add destination-aware wrong-branch logic
-- convert the visual encoder to TensorFlow Lite
-- explore Android implementation using CameraX and TFLite
-
-See `research_notes/future_work.md` for more details.
+- add edge/mobile feasibility tests
+- explore object detection as a separate safety layer
+- prepare TFLite/Android deployment experiments
 
 ---
 
-## Important Safety Note
+## When to Use What
 
-This project is a research prototype.
+| Use case | Recommended path |
+|---|---|
+| Understand the research idea | Read `docs/` and `experiments/` |
+| Reproduce the original experiments | Run notebooks in `experiments/` |
+| Run the stable modular pipeline | Use `scripts/run_backtracking_pipeline.py` |
+| Use a browser upload UI | Use `scripts/backtracking_upload_app.py` |
+| Inspect output without running videos | Open `demo_outputs/` and `sample_results/` |
+| Study current limitations | Read `research_notes/limitations.md` |
+| Study roadmap | Read `research_notes/future_work.md` |
 
-It is not a certified navigation system, safety device, medical device, or mobility aid.
+---
 
-The current goal is to test whether visual route memory and graph-based route reasoning can support personalized assistive navigation research.
+## Privacy
 
-Do not use this project as the only source of navigation or safety guidance.
+Raw route videos are not committed by default because they may contain:
+
+- faces
+- vehicle numbers
+- building names
+- private locations
+- home routes
+- personal movement patterns
+- sensitive route information
+
+Use local videos for testing and commit only curated, anonymized reports.
 
 ---
 
 ## Author
 
 **Ajay Soni**
-
-BCA (Hons.) Data Science Student
 
 Research interests:
 
