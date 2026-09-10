@@ -1,0 +1,52 @@
+# VXN-RAMNet is a local research package; keep accidental Vercel uploads minimal.
+.git/
+.github/
+.vscode/
+.idea/
+
+# Python local/generated state
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Private/generated experiment material
+.env*
+secrets/
+data/raw/
+data/private/
+artifacts/
+_uploaded_videos/
+coverage/
+htmlcov/
+*.log
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.npy
+*.npz
+*.tflite
+*.onnx
+*.h5
+*.keras
+*.weights.h5
+
+# Documentation/research material is not required by a hosted runtime
+docs/
+research/
+tests/
+README.md
+ROADMAP.md
+CHANGELOG.md
+CONTRIBUTING.md
+SECURITY.md
+CITATION.cff
+LICENSE

@@ -1,166 +1,159 @@
-# VXN-RAMNet
+<h1 align="center">VXN-RAMNet</h1>
 
-**VisionX Routine Adaptive Memory Network** is a research prototype for learning and recognizing a constrained visual route pattern without GPS:
+<p align="center">
+  <strong>VisionX Routine Adaptive Memory Network</strong><br>
+  A GPS-free visual route-memory research prototype for learning and recognizing a constrained common-path → junction → branch → turnaround → revisit → second-branch pattern.
+</p>
 
-`common path → junction → Branch A → turnaround → junction revisit → Branch B`
+<p align="center">
+  <img alt="Status" src="https://img.shields.io/badge/status-research%20prototype-blue">
+  <img alt="Language" src="https://img.shields.io/badge/language-Python-yellow">
+  <img alt="Vision" src="https://img.shields.io/badge/vision-EfficientNetB0-purple">
+  <img alt="Interface" src="https://img.shields.io/badge/interface-CLI%20%2F%20Streamlit-success">
+  <img alt="Tests" src="https://img.shields.io/badge/tests-pytest-lightgrey">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
+</p>
 
-> **Status:** active research prototype. The repository implements a camera-only, offline baseline. It does not yet implement the complete VisionX smart-spectacles system and must not be used as a sole navigation or safety system.
+<p align="center">
+  <a href="#overview">Overview</a> ·
+  <a href="#what-this-repo-contains">Contents</a> ·
+  <a href="#implemented-pages">Pages</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#deployment">Deployment</a>
+</p>
 
-![VXN-RAMNet learning and recognition flow](assets/architecture/vxn-ramnet-route-learning-and-recognition.jpeg)
+---
 
-## Current objective
+## Overview
 
-The immediate research objective is to make the camera baseline reproducible, measurable, and scientifically defensible before adding IMU fusion, Android streaming, wearable hardware, ultrasonic supervision, or assistive guidance.
+**VXN-RAMNet** is an offline research baseline for constrained visual route memory without GPS. It learns and recognizes the traversal pattern:
 
-## Implemented now
+```text
+Common path → Junction → Branch A → Turnaround → Junction revisit → Branch B
+```
 
-- Validated video input and deterministic frame sampling.
-- Frozen EfficientNetB0 embeddings for original and horizontally flipped frames.
-- Flip-aware self-similarity analysis.
-- Constrained junction-revisit and turnaround detection.
-- Route-memory segmentation into common path, junction, Branch A, backtrack, and Branch B.
-- Multi-window query scoring with known, uncertain, and unknown decisions.
-- Safe NPZ/JSON artifacts, run-scoped outputs, reports, logs, and manifests.
-- Command-line runner, optional local Streamlit interface, and regression tests based on the verified Notebook 4 sample.
+The immediate objective is reproducible, measurable camera-only research before adding validated IMU fusion, Android streaming, wearable hardware, ultrasonic supervision, or assistive guidance.
 
-## Important limitations
+---
 
-- The topology is limited to one junction and two branches.
-- Branch A/B describe exploration order, not physical left/right direction.
-- Thresholds are research defaults, not calibrated probabilities.
-- Processing is offline and post-hoc, not real-time.
-- The bundled regression fixture verifies implementation fidelity, not generalization.
-- No representative-user, accessibility, safety, or field validation has been completed.
+## What This Repo Contains
 
-See [Project status](docs/project-status.md) for the exact implemented, partial, and not-started scope.
+| Area | What is included |
+|---|---|
+| Vision encoder | Frozen EfficientNetB0 embedding adapters and preprocessing. |
+| Similarity analysis | Flip-aware self-similarity and numerical comparison utilities. |
+| Route memory | Versioned common/junction/branch/backtrack memory representation. |
+| Pipeline | Validated input, sampling, segmentation, scoring, artifacts, and reports. |
+| Configuration | Reproducible YAML configuration with validation. |
+| CLI | Package commands and `scripts/run_pipeline.py` wrapper. |
+| Streamlit UI | Optional local research interface. |
+| Research assets | Notebooks, protocols, architecture diagrams, and evaluation documentation. |
+| Tests | Unit, integration, regression, and reporting tests. |
 
-## Repository structure
+---
+
+## Implemented Pages
+
+| Page / Entry Point | Purpose |
+|---|---|
+| `vxn-ramnet validate-config` | Validate an experiment configuration before execution. |
+| `vxn-ramnet run` | Run the configured learning/query pipeline. |
+| `scripts/run_pipeline.py` | Small command wrapper for pipeline execution. |
+| `apps/streamlit_app.py` | Optional local research/demo UI. |
+| `configs/camera_baseline.yaml` | Baseline camera-only experiment configuration. |
+| `docs/project-status.md` | Implemented/partial/not-started scope boundary. |
+
+---
+
+## Features
+
+| Area | Current Implementation |
+|---|---|
+| Video input | Validated local video ingestion and deterministic frame sampling. |
+| Embeddings | Frozen EfficientNetB0 descriptors for original/flipped frames. |
+| Junction analysis | Constrained junction-revisit and turnaround detection. |
+| Route segmentation | Common path, junction, Branch A, backtrack, and Branch B memory. |
+| Query classification | Multi-window evidence with known/uncertain/unknown decisions. |
+| Artifact safety | Safe NPZ/JSON, run-scoped outputs, manifests, logs, and reports. |
+| Configuration | Explicit schema/validation for experiment parameters and paths. |
+| Testing | Regression protection for the verified Notebook 4 baseline plus unit/integration coverage. |
+| Research safeguards | Explicit uncertainty, limitations, evaluation plan, and technical-debt documentation. |
+
+---
+
+## User Flow
+
+```text
+Prepare learning/query videos
+  ↓
+Copy and edit the baseline configuration
+  ↓
+Validate configuration
+  ↓
+Run offline route-learning/query pipeline
+  ↓
+Inspect evidence, classification, reports, and run artifacts
+  ↓
+Use uncertainty/unknown outcomes rather than forcing a route decision
+```
+
+---
+
+## Structure
 
 ```text
 VXN-RAMNet/
-├── apps/                       # Optional local research UI
-├── assets/architecture/        # Current and target architecture diagrams
-├── configs/                    # Reproducible experiment configurations
-├── docs/                       # Focused research and engineering documentation
-├── research/                   # Historical notebooks and experiment protocol
-├── scripts/                    # Small command wrappers
-├── src/vxn_ramnet/             # Executable package
-├── tests/                      # Unit, integration, and regression tests
-├── pyproject.toml              # Packaging, dependencies, and tool settings
-└── README.md
+├── apps/
+├── assets/architecture/
+├── configs/
+├── docs/
+├── research/
+├── scripts/
+├── src/vxn_ramnet/
+├── tests/
+├── pyproject.toml
+├── README.md
+└── LICENSE
 ```
 
-The source package is divided only where responsibilities are genuinely different:
+---
 
-- `algorithms/`: numerical similarity, junction, turnaround, segmentation, scoring, and decision logic.
-- `config/`: strict experiment configuration and loading.
-- `io/`: safe paths, video handling, atomic files, NPZ handling, and schema validation.
-- `memory/`: versioned route-memory representation and storage.
-- `pipeline/`: executable experiment stages and artifact layout.
-- `reporting/`: machine-readable and human-readable result generation.
-- `vision/`: preprocessing and visual-encoder adapters.
+## Deployment
 
-Future VisionX modules are documented but intentionally not represented as empty implementation stubs.
+VXN-RAMNet is primarily a local Python research package rather than a hosted Vercel application.
 
-## Installation
-
-Python 3.11 or 3.12 is recommended.
+Recommended environment:
 
 ```bash
 python -m venv .venv
+pip install -e ".[vision,dev]"
+ruff check src tests scripts apps
+mypy src/vxn_ramnet
+pytest
 ```
 
-Activate the environment:
-
-```bash
-# Windows
-.venv\Scripts\activate
-
-# Linux or macOS
-source .venv/bin/activate
-```
-
-Install the camera pipeline:
-
-```bash
-python -m pip install --upgrade pip
-pip install -e ".[vision]"
-```
-
-For development and testing:
-
-```bash
-pip install -e ".[dev]"
-```
-
-For notebooks:
-
-```bash
-pip install -e ".[research]"
-```
-
-## Run an experiment
-
-1. Copy the baseline configuration.
-2. Update the learning and query video paths.
-3. Validate the configuration.
-4. Run the pipeline.
-
-```bash
-cp configs/camera_baseline.yaml configs/local.yaml
-vxn-ramnet validate-config --config configs/local.yaml
-vxn-ramnet run --config configs/local.yaml
-```
-
-On Windows PowerShell, use:
-
-```powershell
-Copy-Item configs/camera_baseline.yaml configs/local.yaml
-```
-
-Generated outputs are placed under:
-
-```text
-artifacts/runs/<run-id>/
-```
-
-The pipeline validates all inputs before creating or replacing a managed run directory. It does not recursively clean arbitrary user-selected folders.
-
-## Optional local UI
+Optional local UI:
 
 ```bash
 pip install -e ".[vision,ui]"
 streamlit run apps/streamlit_app.py
 ```
 
-The UI is intended only for local research demonstrations. It is not an authenticated multi-user service.
+`.vercelignore` is included only as repository hygiene for accidental Vercel imports; it does not redefine the supported execution model.
 
-## Verification
+---
 
-```bash
-ruff check src tests scripts apps
-mypy src/vxn_ramnet
-pytest
-```
+## Important Notes
 
-The regression test protects the verified Notebook 4 baseline indices and branch classifications. It must not be interpreted as independent model evaluation.
+- The topology is constrained to one junction and two branches; this is not a general route graph.
+- Branch A/B reflect exploration order, not validated physical left/right direction.
+- Research thresholds are not calibrated probabilities or safety confidence.
+- Processing is offline/post-hoc rather than real-time guidance.
+- The bundled regression fixture verifies implementation fidelity, not independent generalization accuracy.
+- The cleanup removes the stray one-byte `.github/github` artifact while preserving all research, test, package-marker, safety, and citation files.
 
-## Documentation
+---
 
-- [Project status](docs/project-status.md)
-- [Current camera architecture](docs/architecture/current-camera-baseline.md)
-- [Target VisionX architecture](docs/architecture/target-visionx-system.md)
-- [Implementation roadmap](docs/implementation-roadmap.md)
-- [Evaluation plan](docs/evaluation-plan.md)
-- [Artifact contract](docs/artifact-contract.md)
-- [Technical-debt status](docs/technical-debt.md)
-- [Safety and limitations](docs/safety-and-limitations.md)
-- [Research notebooks and experiment protocol](research/README.md)
+## License
 
-## Research integrity
-
-Do not report the system as production-ready, medically validated, safety-certified, or generally accurate. Every performance claim must identify the dataset, participant/environment split, metric, configuration, model version, and evaluation date.
-
-## License and citation
-
-Released under the MIT License. Use [`CITATION.cff`](CITATION.cff) when citing a specific repository revision.
+Released under the MIT License. Use `CITATION.cff` when citing a specific repository revision.
