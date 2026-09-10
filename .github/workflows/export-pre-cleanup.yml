@@ -1,0 +1,31 @@
+name: Export pre-cleanup snapshot
+
+on:
+  push:
+    branches:
+      - backup-artifact/pre-cleanup-2026-09-10
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out pinned backup branch
+        uses: actions/checkout@v4
+        with:
+          ref: backup/pre-cleanup-2026-09-10
+          fetch-depth: 0
+
+      - name: Create source archive
+        shell: bash
+        run: git archive --format=zip --output="VXN-RAMNet-pre-cleanup-2026-09-10.zip" HEAD
+
+      - name: Upload archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: VXN-RAMNet-pre-cleanup-2026-09-10
+          path: VXN-RAMNet-pre-cleanup-2026-09-10.zip
+          if-no-files-found: error
+          retention-days: 7
