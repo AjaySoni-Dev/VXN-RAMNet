@@ -1,0 +1,24 @@
+name: Export current main snapshot
+on:
+  push:
+    branches:
+      - export/current-main-2026-09-10-2103
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Archive main
+        shell: bash
+        run: |
+          repo="${GITHUB_REPOSITORY#*/}"
+          git archive --format=zip --output="${repo}-current-main-2026-09-10.zip" HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: current-main-export
+          path: '*-current-main-2026-09-10.zip'
+          if-no-files-found: error
+          retention-days: 7
